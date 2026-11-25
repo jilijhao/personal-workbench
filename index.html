@@ -381,7 +381,7 @@ footer{color:var(--dim);font-size:11.5px;text-align:center;padding:30px 0 0}
 #quick-capture{display:flex;align-items:center;gap:8px;padding:9px 16px;box-shadow:0 2px 6px #122b1c17}
 #quick-capture .icon{width:16px;height:16px}
 .insight-picker{display:none}
-.dashboard{display:grid;grid-template-columns:minmax(0,2.15fr) minmax(280px,1fr);grid-template-areas:"hero week" "shift shift" "journal follow";gap:18px;align-items:start}
+.dashboard{display:grid;grid-template-columns:minmax(0,2.15fr) minmax(280px,1fr);grid-template-areas:"hero week" "journal follow";gap:18px;align-items:start}
 .today-band{grid-area:hero;isolation:isolate;align-self:stretch;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;position:relative;overflow:hidden;border-radius:var(--radius);min-width:0;min-height:214px;padding:clamp(20px,2.3vw,36px);background:#254936;color:#fff}
 .cover-layers,.cover-layers i{position:absolute;inset:0;pointer-events:none}
 .cover-layers{z-index:-1}
@@ -409,6 +409,14 @@ footer{color:var(--dim);font-size:11.5px;text-align:center;padding:30px 0 0}
 .week-panel{grid-area:week}.insight-column{grid-area:follow;display:grid;gap:16px;min-width:0}.journal{grid-area:journal;min-width:0;scroll-margin-top:12px}
 .journal .card-h{min-height:57px;padding:12px 18px}
 .journal .card-h h2{font-size:17px}
+.journal-pager{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:7px 12px;padding:11px 18px;color:var(--muted)}
+.journal-week-info,.journal-week-controls{display:flex;align-items:center;gap:6px}
+.journal-week-info{flex-wrap:wrap;gap:4px 9px;font-size:12px}
+#journal-week{font-weight:650;color:var(--text);font-variant-numeric:tabular-nums}
+.journal-week-controls button{display:inline-flex;align-items:center;justify-content:center;gap:3px;min-width:32px;min-height:32px;padding:2px 7px;background:var(--surface);border:1px solid var(--line);border-radius:7px;color:var(--text);font-size:12px;white-space:nowrap}
+.journal-week-controls button:not(:disabled):hover{background:var(--surface-3);color:var(--accent)}
+.journal-week-controls button:disabled{color:var(--dim);opacity:.5;cursor:default}
+.journal-week-controls svg{width:14px;height:14px}
 #toggle-filters{display:flex;align-items:center;gap:6px;min-height:32px}
 #toggle-filters .icon{width:14px;height:14px}
 #toggle-filters[aria-expanded="true"]{color:var(--accent);background:var(--tint)}
@@ -422,8 +430,8 @@ footer{color:var(--dim);font-size:11.5px;text-align:center;padding:30px 0 0}
 .journal .rec:hover{background:var(--surface-2)}.journal .rec.starred{border-color:var(--line-soft);background:var(--surface-2)}
 .journal .rec .bar{width:3px}.day-group:last-child .rec:last-child{border-bottom:0}
 @media(min-width:961px){
-  .page-top{position:sticky;top:0;z-index:4;padding:18px 0;margin-bottom:5px;background:var(--bg);background:color-mix(in srgb,var(--bg) 84%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
-  .journal{scroll-margin-top:82px}
+  .page-top{padding:18px 0;margin-bottom:5px}
+  .journal{scroll-margin-top:8px}
   .page-top h1{letter-spacing:-.035em}
 }
 @media(prefers-reduced-motion:no-preference){
@@ -444,7 +452,7 @@ footer{color:var(--dim);font-size:11.5px;text-align:center;padding:30px 0 0}
   .dashboard{grid-template-columns:minmax(0,1.65fr) minmax(247px,1fr);gap:12px}
 }
 @media(max-width:740px){
-  .dashboard{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"hero hero" "shift shift" "week follow" "journal journal"}
+  .dashboard{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"hero hero" "week follow" "journal journal"}
   .today-band{min-height:170px}
   .journal .stats{padding-block:12px}
   .journal .card-h .sub{display:inline}
@@ -455,7 +463,7 @@ footer{color:var(--dim);font-size:11.5px;text-align:center;padding:30px 0 0}
   .rail-tools #quick-export{width:34px;justify-content:center}
   .tabs .tab{flex:1;gap:6px;min-height:44px;padding:5px 2px;font-size:13px}
   .page{padding:0 12px 18px}.page-top{padding:15px 2px 12px}.page-top h1{font-size:23px}
-  .dashboard{grid-template-columns:minmax(0,1fr);grid-template-areas:"hero" "shift" "picker" "insight" "journal";gap:10px}
+  .dashboard{grid-template-columns:minmax(0,1fr);grid-template-areas:"hero" "picker" "insight" "journal";gap:10px}
   .insight-column{display:contents}
   .insight-picker{grid-area:picker;display:flex;gap:4px;padding:3px;border:1px solid var(--line);border-radius:10px;background:var(--surface-3)}
   .insight-picker button{flex:1;background:transparent;color:var(--muted);font-size:13px;border:0;border-radius:7px;min-height:34px}
@@ -467,10 +475,40 @@ footer{color:var(--dim);font-size:11.5px;text-align:center;padding:30px 0 0}
   .journal .stat{padding-inline:9px}.journal .card-h{padding:10px}
 }
 
+/* ---------- 下班前十分钟 ---------- */
+#shift-countdown{
+  --countdown-surface:#193e33;--countdown-text:#f5faea;--countdown-detail:#c6d7c8;--countdown-bar:#cdeba5;
+  position:fixed;right:max(24px,env(safe-area-inset-right));bottom:max(20px,env(safe-area-inset-bottom));
+  z-index:12;width:min(450px,calc(100vw - 32px));box-sizing:border-box;padding:18px 24px;
+  border:1px solid #ffffff29;border-radius:18px;background:var(--countdown-surface);
+  color:var(--countdown-text);box-shadow:0 12px 40px #0a191d40,inset 0 1px #ffffff17
+}
+#shift-countdown[hidden]{display:none}
+:root[data-theme="mist"] #shift-countdown{--countdown-surface:#263c55;--countdown-detail:#cfdae6;--countdown-bar:#afd9ee}
+:root[data-theme="ink"] #shift-countdown{--countdown-surface:#24382f;--countdown-detail:#bfcec4;--countdown-bar:#c2dc98}
+.shift-countdown-head,.shift-countdown-foot{display:flex;align-items:center;justify-content:space-between;gap:12px}
+#shift-countdown-label{font-weight:650;font-size:15px}
+#shift-countdown-size{padding:4px 11px;border:1px solid #ffffff50;border-radius:20px;color:inherit;background:transparent;font-size:12px;line-height:19px}
+#shift-countdown-size:hover{background:#ffffff16}
+#shift-countdown-size:focus-visible{outline-color:var(--countdown-bar)}
+#shift-countdown-time{display:block;font-size:clamp(72px,9vw,120px);line-height:1.03;font-weight:650;letter-spacing:-.055em;font-variant-numeric:tabular-nums}
+.shift-countdown-foot{margin-top:9px;font-size:12px;color:var(--countdown-detail)}
+.shift-countdown-track{flex:1;height:4px;border-radius:4px;background:#ffffff25;overflow:hidden}
+.shift-countdown-track i{display:block;width:100%;height:100%;background:var(--countdown-bar);transform-origin:left}
+#shift-countdown[data-compact]{width:auto;display:flex;align-items:center;gap:11px;padding:7px 9px 7px 14px;border-radius:12px}
+#shift-countdown[data-compact][hidden]{display:none}
+#shift-countdown[data-compact] .shift-countdown-head{display:contents}
+#shift-countdown[data-compact] #shift-countdown-label{font-size:12px;color:var(--countdown-detail)}
+#shift-countdown[data-compact] #shift-countdown-time{font-size:25px;letter-spacing:-.035em}
+#shift-countdown[data-compact] #shift-countdown-size{order:1}
+#shift-countdown[data-compact] .shift-countdown-foot{display:none}
+@media(max-width:560px){
+  #shift-countdown{right:max(12px,env(safe-area-inset-right));bottom:max(12px,env(safe-area-inset-bottom));width:min(330px,calc(100vw - 24px));padding:12px 16px}
+}
 /* ---------- work clock ---------- */
 .work-clock{
   --clock-accent:var(--accent);--clock-tint:var(--tint);
-  grid-area:shift;min-width:0;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(170px,1fr) auto;
+  min-width:0;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(170px,1fr) auto;
   gap:12px 28px;align-items:center;padding:16px 20px;border:1px solid var(--line);
   border-radius:var(--radius);background:var(--surface);
   background:linear-gradient(112deg,color-mix(in srgb,var(--clock-tint) 65%,var(--surface)),var(--glass) 55%);
@@ -509,19 +547,82 @@ body:has(#clock-dialog[open]){overflow:hidden}
 #clock-form .grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
 #clock-form .hint{margin:0}
 #clock-form .btn-row{justify-content:flex-end}
-@media(max-width:740px){
-  .work-clock{grid-template-columns:minmax(0,1fr) auto;gap:9px 16px;padding:14px}
-  .clock-reading{grid-column:1/-1;grid-row:2}
-  .clock-buttons{grid-column:2;grid-row:1}
-}
 @media(max-width:560px){
-  .work-clock{gap:10px;padding:12px}
   .clock-symbol{display:none}
-  .clock-buttons .btn{min-height:40px;padding-inline:8px;font-size:12px}
-  .work-clock:not([data-phase="unset"]) .clock-info{grid-column:1/-1}
-  .work-clock:not([data-phase="unset"]) .clock-reading{grid-column:1;grid-row:2}
-  .work-clock:not([data-phase="unset"]) .clock-buttons{grid-column:2;grid-row:2}
-  .clock-value{align-items:flex-start;flex-direction:column;gap:1px}
+}
+/* ---------- personal plans ---------- */
+.plan-board{max-width:1060px;overflow:hidden}
+.plan-toolbar,.plan-group-title,.plan-row,.plan-actions,.plan-meta{display:flex;align-items:center;gap:9px}
+.plan-toolbar{justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--line-soft)}
+.plan-toolbar .seg button{display:inline-flex;align-items:center;gap:7px}
+.plan-total{font-size:11px;font-variant-numeric:tabular-nums}
+.plan-groups{padding:0 20px}
+.plan-group{padding:14px 0 5px}
+.plan-group:last-child{padding-bottom:14px}
+.plan-group-title{margin:0 0 4px;font-size:13px;font-weight:650;color:var(--muted)}
+.plan-group-title small{font-size:11px;font-weight:550}
+.plan-group[data-group="late"] .plan-group-title{color:var(--danger)}
+.plan-group[data-group="today"] .plan-group-title{color:var(--accent)}
+.plan-group ul{list-style:none;margin:0;padding:0}
+.plan-row{align-items:flex-start;padding:13px 0;border-bottom:1px solid var(--line-soft)}
+.plan-row:last-child{border-bottom:0}
+.plan-check{width:32px;min-height:36px;flex:none;display:grid;place-items:center;cursor:pointer}
+.plan-check input{margin:0;width:17px;height:17px;cursor:pointer;accent-color:var(--accent)}
+.plan-copy{min-width:0;flex:1}
+.plan-name{display:block;font-size:14px;font-weight:650;overflow-wrap:anywhere}
+.plan-row.is-done .plan-name{color:var(--muted);text-decoration:line-through}
+.plan-meta{flex-wrap:wrap;gap:5px 12px;font-size:12px;color:var(--muted);margin-top:3px}
+.plan-meta time{font-variant-numeric:tabular-nums}
+.plan-meta span,.plan-note{overflow-wrap:anywhere}
+.plan-note{margin:5px 0 0;font-size:13px;color:var(--muted);white-space:pre-wrap}
+.plan-actions{gap:3px}
+.plan-actions .icon-btn{width:32px;height:32px}
+.plan-actions .icon{width:15px;height:15px}
+#plan-load-error,#plan-error{margin:12px 20px;color:var(--danger);font-size:13px}
+#plan-dialog{padding:0;max-width:none;width:min(450px,calc(100% - 24px));max-height:calc(100dvh - 24px);border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);color:var(--text);box-shadow:0 16px 54px #0003}
+#plan-dialog::backdrop{background:rgb(14 24 20 / 48%)}
+body:has(#plan-dialog[open]){overflow:hidden}
+#plan-form{display:grid;gap:14px;padding:20px}
+#plan-form h2{font-size:18px;margin:0}
+#plan-form .grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+#plan-form .btn-row{justify-content:flex-end}
+#plan-error{margin:0}
+@media(max-width:560px){
+  .plan-toolbar{padding:10px;gap:5px}
+  .plan-toolbar button{min-height:40px}
+  .plan-toolbar .seg button{padding-inline:8px;gap:4px}
+  .plan-groups{padding-inline:10px}
+  .plan-row{gap:4px}
+  .plan-check,.plan-actions .icon-btn{width:36px;height:40px}
+}
+:root{--runner-strip:url("data:image/png;base64,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")}
+
+/* The clock stays in normal flow and pins when the reader scrolls. */
+.clock-dock{position:sticky;top:0;z-index:8;padding:9px 0 5px;background:var(--bg);background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+html{scroll-padding-top:var(--clock-dock-height,110px)}
+.clock-dock .work-clock{padding:12px 18px;gap:4px 18px;grid-template-columns:minmax(0,1fr) minmax(135px,.65fr) auto;box-shadow:0 2px 12px #10251a0d}
+.clock-dock .work-clock[data-phase="unset"]{grid-template-columns:minmax(0,1fr) auto}
+.clock-dock .clock-reading{display:contents}
+.clock-dock .clock-info{grid-column:1;grid-row:1}
+.clock-dock .clock-value{grid-column:2;grid-row:1;justify-content:flex-end;align-items:center}
+.clock-dock .clock-buttons{grid-column:-2;grid-row:1}
+.clock-dock .clock-track{--runner-position:0%;--runner-width:44px;position:relative;grid-column:1/-1;grid-row:2;display:block;overflow:visible;height:5px;margin-top:23px;background:var(--line-soft)}
+.clock-dock .clock-track i{border-radius:inherit;background:linear-gradient(90deg,var(--accent-2),var(--clock-accent))}
+.clock-runner{position:absolute;bottom:2px;left:var(--runner-position);transform:translateX(calc(0% - var(--runner-position)));width:var(--runner-width);height:28px;background-image:var(--runner-strip);background-repeat:no-repeat;background-size:600% 100%;image-rendering:pixelated;pointer-events:none}
+@keyframes dog-stride{to{background-position:120% 0}}
+@media(prefers-reduced-motion:no-preference){
+  .work-clock:is([data-phase="working"],[data-phase="overtime"]) .clock-runner{animation:dog-stride .54s steps(6,end) infinite}
+}
+@media(max-width:740px){
+  .clock-dock{padding:5px 0 3px}
+  .clock-dock .work-clock{padding:9px 12px;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px}
+  .clock-dock .clock-info{grid-column:1;grid-row:1}
+  .clock-dock .clock-buttons{grid-column:2;grid-row:1}
+  .clock-dock .clock-value{grid-column:1/-1;grid-row:2;flex-direction:row;align-items:baseline;justify-content:flex-end}
+  .clock-dock .clock-track{grid-row:3;margin-top:13px;--runner-width:33px}
+  .clock-dock .clock-runner{height:21px}
+  .clock-dock .clock-buttons .btn{min-height:34px;padding:5px 8px;font-size:12px}
+  .clock-dock #clock-time{font-size:22px}
 }
 </style>
 </head>
@@ -552,6 +653,9 @@ body:has(#clock-dialog[open]){overflow:hidden}
     <button class="tab" id="tab-log" role="tab" data-view="log" aria-controls="view-log" aria-selected="true" type="button">
       <svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg>工作台
     </button>
+    <button class="tab" id="tab-plan" role="tab" data-view="plan" aria-controls="view-plan" aria-selected="false" tabindex="-1" type="button">
+      <svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg>计划
+    </button>
     <button class="tab" id="tab-review" role="tab" data-view="review" aria-controls="view-review" aria-selected="false" tabindex="-1" type="button">
       <svg class="icon" aria-hidden="true"><use href="#i-chart"/></svg>复盘报告
     </button>
@@ -577,11 +681,36 @@ body:has(#clock-dialog[open]){overflow:hidden}
           <option value="mist">雾蓝</option><option value="ink">墨绿</option>
         </select>
       </label>
-      <button class="btn btn-sm" id="quick-export" type="button" aria-label="导出备份" title="导出 JSON 备份"><svg class="icon" aria-hidden="true"><use href="#i-export"/></svg><span class="export-label">导出备份</span></button>
+      <button class="btn btn-sm" id="quick-export" type="button" aria-label="导出工作记录备份" title="导出工作记录 JSON 备份"><svg class="icon" aria-hidden="true"><use href="#i-export"/></svg><span class="export-label">备份工作记录</span></button>
 
     </div>
   </aside>
   <div class="page">
+    <div class="clock-dock">
+      <section id="work-clock" class="work-clock" data-phase="unset" aria-labelledby="clock-title">
+        <div class="clock-info">
+          <span class="clock-symbol" aria-hidden="true">
+            <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.1"/>
+              <path d="M12 4v1m8 7h-1m-7 8v-1m-8-7h1" opacity=".55"/>
+              <path class="clock-hand hour" d="M12 12V8"/><path class="clock-hand minute" d="M12 12V5.5"/>
+            </svg>
+          </span>
+          <div>
+            <div class="clock-heading"><h2 id="clock-title">工作时钟</h2><span id="clock-phase" role="status" hidden></span></div>
+            <p id="clock-range">设置班次后可查看下班倒计时。</p>
+          </div>
+        </div>
+        <div class="clock-reading" hidden>
+          <div class="clock-value"><span id="clock-caption"></span><strong id="clock-time" role="timer" aria-labelledby="clock-caption"></strong></div>
+          <span class="clock-track" aria-hidden="true"><i></i><span class="clock-runner"></span></span>
+        </div>
+        <div class="clock-buttons">
+          <button class="btn btn-ghost" id="clock-settings" type="button" aria-haspopup="dialog">设置上下班时间</button>
+          <button class="btn" id="clock-toggle" type="button" hidden>我下班了</button>
+        </div>
+        <p id="clock-error" role="alert" hidden></p>
+      </section>
+    </div>
     <header class="page-top">
       <h1 id="page-title">工作概览</h1>
       <button class="btn btn-primary" id="quick-capture" type="button" aria-haspopup="dialog"><svg class="icon" aria-hidden="true"><use href="#i-edit"/></svg>记一条</button>
@@ -612,29 +741,7 @@ body:has(#clock-dialog[open]){overflow:hidden}
             </div>
           </section>
           <section class="week-panel" id="week-panel" aria-label="本周节奏"></section>
-          <section id="work-clock" class="work-clock" data-phase="unset" aria-labelledby="clock-title">
-            <div class="clock-info">
-              <span class="clock-symbol" aria-hidden="true">
-                <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.1"/>
-                  <path d="M12 4v1m8 7h-1m-7 8v-1m-8-7h1" opacity=".55"/>
-                  <path class="clock-hand hour" d="M12 12V8"/><path class="clock-hand minute" d="M12 12V5.5"/>
-                </svg>
-              </span>
-              <div>
-                <div class="clock-heading"><h2 id="clock-title">工作时钟</h2><span id="clock-phase" role="status" hidden></span></div>
-                <p id="clock-range">设置班次后可查看下班倒计时。</p>
-              </div>
-            </div>
-            <div class="clock-reading" hidden>
-              <div class="clock-value"><span id="clock-caption"></span><strong id="clock-time" role="timer" aria-labelledby="clock-caption"></strong></div>
-              <span class="clock-track" aria-hidden="true"><i></i></span>
-            </div>
-            <div class="clock-buttons">
-              <button class="btn btn-ghost" id="clock-settings" type="button" aria-haspopup="dialog">设置上下班时间</button>
-              <button class="btn" id="clock-toggle" type="button" hidden>我下班了</button>
-            </div>
-            <p id="clock-error" role="alert" hidden></p>
-          </section>
+
           <section class="card journal" id="journal" aria-labelledby="journal-title">
             <div class="card-h">
               <svg class="icon" aria-hidden="true"><use href="#i-list"/></svg>
@@ -642,6 +749,16 @@ body:has(#clock-dialog[open]){overflow:hidden}
               <span class="sub" id="stream-count"></span>
               <button type="button" class="btn btn-sm" id="toggle-filters" aria-expanded="false" aria-controls="filters"><svg class="icon" aria-hidden="true"><use href="#i-filter"/></svg>筛选</button>
             </div>
+            <nav class="journal-pager" aria-label="按周翻阅工作记录">
+              <div class="journal-week-info" aria-live="polite" aria-atomic="true">
+                <span id="journal-week"></span><span id="journal-page-count"></span>
+              </div>
+              <div class="journal-week-controls">
+                <button id="journal-prev" type="button" title="上一页 · 较新一周"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="m14 5-7 7 7 7"/></svg>上一页</button>
+                <button id="journal-current" type="button" aria-label="回到本周">本周</button>
+                <button id="journal-next" type="button" title="下一页 · 较早一周">下一页<svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="m10 5 7 7-7 7"/></svg></button>
+              </div>
+            </nav>
             <div class="stats" id="stats"></div>
             <div class="filter-bar" id="filters" hidden>
               <div class="field small">
@@ -679,6 +796,20 @@ body:has(#clock-dialog[open]){overflow:hidden}
             <section class="follow-panel" id="follow-panel" aria-label="待跟进"></section>
             <section class="project-panel" id="project-panel" aria-label="本周项目投入" hidden></section>
           </div>
+      </div>
+    </section>
+
+    <section id="view-plan" role="tabpanel" aria-labelledby="tab-plan" hidden>
+      <div class="card plan-board">
+        <div class="plan-toolbar">
+          <div class="seg" role="group" aria-label="计划状态">
+            <button type="button" data-plan-filter="pending" aria-pressed="true">待办 <span class="plan-total" id="plan-pending-total">0</span></button>
+            <button type="button" data-plan-filter="done" aria-pressed="false">已完成 <span class="plan-total" id="plan-done-total">0</span></button>
+          </div>
+          <button type="button" class="btn btn-primary" id="plan-new" aria-haspopup="dialog">＋ 新建计划</button>
+        </div>
+        <p role="alert" id="plan-load-error" hidden></p>
+        <div id="plan-list" class="plan-groups"></div>
       </div>
     </section>
 
@@ -734,8 +865,8 @@ body:has(#clock-dialog[open]){overflow:hidden}
     <section id="view-data" role="tabpanel" aria-labelledby="tab-data" hidden>
       <div class="data-grid">
         <div class="card data-item">
-          <h3>本地存储概况</h3>
-          <p class="hint">所有数据保存在这个浏览器的 localStorage，换浏览器 / 清缓存前请先导出备份。</p>
+          <h3>工作记录存储概况</h3>
+          <p class="hint">工作记录保存在当前浏览器，换浏览器或清缓存前可先导出 JSON。</p>
           <div class="kv"><span>记录总数</span><b id="d-count">0</b></div>
           <div class="kv"><span>覆盖天数</span><b id="d-days">0</b></div>
           <div class="kv"><span>涉及项目</span><b id="d-projects">0</b></div>
@@ -744,8 +875,8 @@ body:has(#clock-dialog[open]){overflow:hidden}
         </div>
 
         <div class="card data-item">
-          <h3>导出备份</h3>
-          <p class="hint">JSON 可完整还原（含标星、状态）；CSV 适合丢进 Excel 自己算。</p>
+          <h3>备份工作记录</h3>
+          <p class="hint">JSON 可还原工作记录及其标星和状态。CSV 可在 Excel 中查看。</p>
           <div class="btn-row">
             <button class="btn btn-primary btn-sm" id="export-json" type="button">导出 JSON</button>
             <button class="btn btn-sm" id="export-csv" type="button">导出 CSV</button>
@@ -753,13 +884,13 @@ body:has(#clock-dialog[open]){overflow:hidden}
         </div>
 
         <div class="card data-item">
-          <h3>导入还原</h3>
-          <p class="hint">选一份之前导出的 JSON。合并模式按 ID 去重，不会覆盖已有记录；覆盖模式会先清空。</p>
+          <h3>还原工作记录</h3>
+          <p class="hint">选择之前导出的工作记录 JSON。合并时按记录 ID 去重，覆盖时会替换现有工作记录。</p>
           <div class="field" style="margin-bottom:12px">
             <label for="import-mode">导入方式</label>
             <select id="import-mode">
               <option value="merge">合并（推荐）</option>
-              <option value="replace">覆盖现有数据</option>
+              <option value="replace">覆盖现有工作记录</option>
             </select>
           </div>
           <input type="file" id="import-file" accept=".json,application/json" style="font-size:12.5px;max-width:100%">
@@ -778,10 +909,38 @@ body:has(#clock-dialog[open]){overflow:hidden}
     </section>
   </main>
 
-  <footer>数据保存在此浏览器 · 可导出备份</footer>
+  <footer>数据保存在此浏览器 · 工作记录可导出备份</footer>
   </div>
 </div>
 
+<dialog id="plan-dialog" aria-labelledby="plan-dialog-title">
+  <form id="plan-form" autocomplete="off">
+    <h2 id="plan-dialog-title">新建计划</h2>
+    <div class="field"><label for="plan-title">计划事项</label><input id="plan-title" type="text" maxlength="120" placeholder="例如：梳理下周的发布清单" required autofocus></div>
+    <div class="grid-2">
+      <div class="field"><label for="plan-date">计划日期</label><input type="date" id="plan-date" min="0001-01-01" max="9999-12-31" required></div>
+      <div class="field"><label for="plan-project">项目（可选）</label><input id="plan-project" type="text" maxlength="40" list="project-list"></div>
+    </div>
+    <div class="field"><label for="plan-note">备注（可选）</label><textarea id="plan-note" maxlength="2000" rows="3"></textarea></div>
+    <p id="plan-error" role="alert" hidden></p>
+    <div class="btn-row">
+      <button type="button" class="btn btn-ghost" id="plan-cancel">取消</button>
+      <button type="submit" class="btn btn-primary" id="plan-save">保存计划</button>
+    </div>
+  </form>
+</dialog>
+
+<aside id="shift-countdown" aria-labelledby="shift-countdown-label" hidden>
+  <div class="shift-countdown-head">
+    <span id="shift-countdown-label">距离下班</span>
+    <button type="button" id="shift-countdown-size" aria-expanded="true" aria-label="收起大倒计时">收起</button>
+  </div>
+  <span id="shift-countdown-time" role="timer" aria-live="off" aria-labelledby="shift-countdown-label"></span>
+  <div class="shift-countdown-foot">
+    <span class="shift-countdown-track" aria-hidden="true"><i></i></span>
+    <span id="shift-countdown-end"></span>
+  </div>
+</aside>
 <dialog id="clock-dialog" aria-labelledby="clock-dialog-title">
   <form id="clock-form">
     <h2 id="clock-dialog-title">设置上下班时间</h2>
@@ -889,7 +1048,7 @@ let store = {
   records: [],
   ui: {
     view:'log', range:'all', category:'all', project:'', keyword:'', starOnly:false,
-    customFrom:'', customTo:'', reviewRange:'month', editing:null
+    customFrom:'', customTo:'', journalWeek:null, reviewRange:'month', editing:null
   }
 };
 
@@ -980,6 +1139,7 @@ function addRecord(raw){
   r.id = raw && raw.id ? String(raw.id) : uid();
   store.records.push(r);
   if (!save()) { store.records.pop(); return null; }
+  if (getFiltered().includes(r)) selectJournalWeek(r.date);
   render();
   return r;
 }
@@ -991,6 +1151,7 @@ function updateRecord(id, patch){
   const previous = store.records[i];
   store.records[i] = merged;
   if (!save()) { store.records[i] = previous; return null; }
+  if (merged.date !== previous.date && getFiltered().includes(merged)) selectJournalWeek(merged.date);
   render();
   return merged;
 }
@@ -1205,12 +1366,12 @@ function submitComposer(){
 }
 
 /* ---------- 渲染：统计 / 今日 / 时间线 ---------- */
-function renderStats(){
-  const s = computeStats(getFiltered());
+function renderStats(page,totalMatches){
+  const s = computeStats(page);
   const cards = [
     { k:'工作记录', icon:'list', v:s.count, unit:'条', n:`进行中 ${s.doing} · 阻塞 ${s.blocked}` },
     { k:'投入时长', icon:'clock', v:fmtHours(s.minutes).split(' ')[0], unit:'小时', n:'按填写时长累计' },
-    { k:'活跃天数', icon:'calendar', v:s.days, unit:'天', n:`连续记录 ${s.streak} 天` },
+    { k:'活跃天数', icon:'calendar', v:s.days, unit:'天', n:'本页有记录的日期' },
     { k:'关键成果', icon:'star', v:s.stars, unit:'项', n:'★ 自动进年终总结' }
   ];
   $('#stats').innerHTML = cards.map(c=>
@@ -1224,7 +1385,7 @@ function renderStats(){
   if (u.project) labels.push(u.project);
   if (u.keyword.trim()) labels.push('搜索「' + u.keyword.trim() + '」');
   if (u.starOnly) labels.push('标星成果');
-  $('#stream-count').textContent = labels.length ? `已筛出 ${s.count} 条 / 共 ${store.records.length} 条` : `共 ${s.count} 条`;
+  $('#stream-count').textContent = labels.length ? `已筛出 ${totalMatches} 条 / 共 ${store.records.length} 条` : `共 ${totalMatches} 条`;
   updateShortcutSelection();
   const filterSummary = $('#filter-summary');
   filterSummary.hidden = !labels.length;
@@ -1392,19 +1553,69 @@ function recordHTML(r){
     </div>
   </article>`;
 }
-function renderTimeline(){
-  const list = getFiltered().slice().sort((a,b)=>{
+function selectJournalWeek(date){
+  const monday = weekStart(date);
+  store.ui.journalWeek = monday === weekStart(todayStr()) ? null : monday;
+}
+function hasJournalFilters(){
+  const u = store.ui;
+  return u.range !== 'all' || u.category !== 'all' || !!u.project || !!u.keyword.trim() || u.starOnly;
+}
+function renderJournal(preferMatch=false){
+  const u = store.ui, today = todayStr(), current = weekStart(today);
+  const matches = getFiltered();
+  // 无明确日期边界时，可从本周逐周翻至最早或最晚的匹配记录。
+  const from = u.range === 'custom' ? u.customFrom : '';
+  const to = u.range === 'custom' ? u.customTo : '';
+  const anchor = weekStart(from && today < from ? from : to && today > to ? to : today);
+  let earliest = anchor, latest = anchor;
+  let selected = u.journalWeek || current;
+  if (preferMatch && !hasJournalFilters()) selected = current;
+  if (from && to && from <= to) {
+    earliest = from;
+    latest = to;
+  }
+  let priorDate = '', nextDate = '';
+  const selectedEnd = shiftDays(selected,6);
+  for (const r of matches) {
+    if (r.date < earliest) earliest = r.date;
+    if (r.date > latest) latest = r.date;
+    if (r.date <= selectedEnd && r.date > priorDate) priorDate = r.date;
+    if (r.date > selectedEnd && (!nextDate || r.date < nextDate)) nextDate = r.date;
+  }
+  if (preferMatch && hasJournalFilters() && (priorDate || nextDate)) selected = weekStart(priorDate || nextDate);
+  const first = weekStart(earliest), last = weekStart(latest);
+  if (selected < first) selected = first;
+  if (selected > last) selected = last;
+  u.journalWeek = selected === current ? null : selected;
+
+  const end = shiftDays(selected,6);
+  const page = matches.filter(r=>r.date >= selected && r.date <= end);
+  const endLabel = end.slice(0,4) === selected.slice(0,4) ? end.slice(5) : end;
+  $('#journal-week').textContent = (selected === current ? '本周 · ' : '') + selected.replaceAll('-','.')+' — '+endLabel.replaceAll('-','.');
+  $('#journal-page-count').textContent = '本页 '+page.length+' 条';
+  $('#journal-prev').disabled = selected >= last;
+  $('#journal-next').disabled = selected <= first;
+  const home = $('#journal-current');
+  home.disabled = selected === current || current < first || current > last;
+  home.title = current < first || current > last ? '筛选日期不包含本周' : '回到本周';
+  renderStats(page,matches.length);
+  renderTimeline(page,matches.length);
+}
+function renderTimeline(page,totalMatches){
+  const list = page.slice().sort((a,b)=>{
     if (a.date !== b.date) return b.date.localeCompare(a.date);
     if ((a.time||'') !== (b.time||'')) return (b.time||'').localeCompare(a.time||'');
     return String(b.createdAt).localeCompare(String(a.createdAt));
   });
   const box = $('#timeline');
   if (!list.length){
-    const filtered = store.records.length > 0;
+    const filtered = hasJournalFilters();
+    const otherWeeks = totalMatches > 0;
     box.innerHTML = `<div class="empty"><span class="empty-icon"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg></span>
-      <h3>${filtered ? '没有匹配的记录' : '还没有工作记录'}</h3>
-      <p>${filtered ? '调整筛选条件，或返回查看全部记录。' : '写下一条工作进展，就能在这里按日期回看。'}</p>
-      <button class="btn btn-sm" type="button" data-empty="${filtered ? 'reset' : 'capture'}">${filtered ? '清除筛选' : '记一条'}</button></div>`;
+      <h3>${otherWeeks ? '这周还没有记录' : filtered ? '没有匹配的记录' : '还没有工作记录'}</h3>
+      <p>${otherWeeks ? '可翻到其他周查看记录。' : filtered ? '调整筛选条件，或返回查看全部记录。' : '写下一条工作进展，就能在这里按日期回看。'}</p>
+      ${otherWeeks ? '' : `<button class="btn btn-sm" type="button" data-empty="${filtered ? 'reset' : 'capture'}">${filtered ? '清除筛选' : '记一条'}</button>`}</div>`;
     return;
   }
   const groups = new Map();
@@ -1653,9 +1864,8 @@ function render(){
   renderProjectOptions();
   renderProjectPanel();
   renderFollowUp();
-  renderStats();
+  renderJournal();
   renderTodayBand();
-  renderTimeline();
   renderReview();
   renderData();
   const noProjects = $('#project-panel').hidden;
@@ -1882,6 +2092,34 @@ const clockLabels = {
 let clockTick = null;
 let clockCalendarDate = todayStr();
 let clockCardState = '';
+const finalWindowMs = 10 * 60 * 1000;
+const compactShiftKey = 'workbench.countdown.compactShift.v1';
+let compactShift = '';
+try { compactShift = localStorage.getItem(compactShiftKey) || ''; } catch {}
+
+function renderShiftCountdown(clock){
+  const card = $('#shift-countdown');
+  const active = clock.phase === 'working' && clock.timerMs > 0 && clock.timerMs <= finalWindowMs;
+  card.hidden = !active;
+  if (!active) return;
+  card.dataset.shift = String(clock.startAt);
+  const compact = compactShift === card.dataset.shift;
+  card.toggleAttribute('data-compact',compact);
+  const button = $('#shift-countdown-size');
+  const expanded = String(!compact);
+  if (button.getAttribute('aria-expanded') !== expanded) {
+    button.setAttribute('aria-expanded',expanded);
+    button.textContent = compact ? '展开' : '收起';
+    button.setAttribute('aria-label',compact ? '展开大倒计时' : '收起大倒计时');
+  }
+  const seconds = Math.ceil(clock.timerMs/1000);
+  const time = pad(Math.floor(seconds/60))+':'+pad(seconds%60);
+  const display = $('#shift-countdown-time');
+  if (display.textContent !== time) display.textContent = time;
+  const end = $('#shift-countdown-end');
+  if (end.textContent !== clock.endTime+' 下班') end.textContent = clock.endTime+' 下班';
+  $('.shift-countdown-track i').style.transform = 'scaleX('+clock.timerMs/finalWindowMs+')';
+}
 function renderWorkClock(clock){
   const {phase,startTime,endTime,finishedAt,timerMs,progress} = clock;
   const configured = phase !== 'unset';
@@ -1914,7 +2152,9 @@ function renderWorkClock(clock){
   const time = [Math.floor(seconds/3600),Math.floor(seconds/60)%60,seconds%60].map(pad).join(':');
   const display = $('#clock-time');
   if (display.textContent !== time) display.textContent = time;
-  $('.clock-track i').style.transform = 'scaleX('+progress+')';
+  const track = $('.clock-track');
+  track.firstElementChild.style.transform = 'scaleX('+progress+')';
+  track.style.setProperty('--runner-position',(progress*100)+'%');
 }
 function refreshWorkClock(){
   clearTimeout(clockTick);
@@ -1923,23 +2163,35 @@ function refreshWorkClock(){
   if (date !== clockCalendarDate) {
     clockCalendarDate = date;
     render();
+    if (store.ui.view === 'plan') renderPlans();
   }
-  let interval = 60000;
-  if (store.ui.view === 'log') {
-    const dial = $('.clock-symbol');
-    if (dial.dataset.minute !== String(now.getMinutes()) || dial.dataset.hour !== String(now.getHours())) {
-      dial.dataset.hour = now.getHours();
-      dial.dataset.minute = now.getMinutes();
-      dial.style.setProperty('--hour-angle', (now.getHours()%12*30+now.getMinutes()/2)+'deg');
-      dial.style.setProperty('--minute-angle',(now.getMinutes()*6)+'deg');
-    }
-    const snapshot = workClockSnapshot(now);
-    renderWorkClock(snapshot);
-    if (['before','working','overtime'].includes(snapshot.phase)) interval = 1000;
+  const dial = $('.clock-symbol');
+  if (dial.dataset.minute !== String(now.getMinutes()) || dial.dataset.hour !== String(now.getHours())) {
+    dial.dataset.hour = now.getHours();
+    dial.dataset.minute = now.getMinutes();
+    dial.style.setProperty('--hour-angle', (now.getHours()%12*30+now.getMinutes()/2)+'deg');
+    dial.style.setProperty('--minute-angle',(now.getMinutes()*6)+'deg');
   }
+  const snapshot = workClockSnapshot(now);
+  renderWorkClock(snapshot);
+  renderShiftCountdown(snapshot);
+  const interval = ['before','working','overtime'].includes(snapshot.phase) ? 1000 : 60000;
   clockTick = setTimeout(refreshWorkClock,interval - now.getTime() % interval);
 }
 function initWorkClock(){
+  $('#shift-countdown-size').addEventListener('click',()=>{
+    const card = $('#shift-countdown');
+    compactShift = card.hasAttribute('data-compact') ? '' : card.dataset.shift;
+    try {
+      if (compactShift) localStorage.setItem(compactShiftKey,compactShift);
+      else localStorage.removeItem(compactShiftKey);
+    } catch {}
+    refreshWorkClock();
+  });
+  const dock = $('.clock-dock');
+  const syncDockHeight = ()=>document.documentElement.style.setProperty('--clock-dock-height', Math.ceil(dock.getBoundingClientRect().height)+'px');
+  syncDockHeight();
+  new ResizeObserver(syncDockHeight).observe(dock);
   const dialog = $('#clock-dialog');
   const start = $('#clock-start'), end = $('#clock-end');
   const error = $('#clock-dialog-error');
@@ -1982,7 +2234,170 @@ function initWorkClock(){
   window.addEventListener('pageshow',refreshWorkClock);
   window.addEventListener('pagehide',()=>clearTimeout(clockTick));
   window.addEventListener('storage',event=>{
-    if (event.key === WORK_CLOCK_KEY || event.key === null) refreshWorkClock();
+    if (event.key === compactShiftKey || event.key === null) compactShift = event.newValue || '';
+    if (event.key === WORK_CLOCK_KEY || event.key === compactShiftKey || event.key === null) refreshWorkClock();
+  });
+}
+
+/* ---------- 计划 ---------- */
+const PLAN_KEY = 'workbench.plans.v1';
+let plans = [];
+let planFilter = 'pending';
+let editingPlan = null;
+function readPlans(){
+  const raw = localStorage.getItem(PLAN_KEY);
+  if (raw === null) return [];
+  const items = JSON.parse(raw);
+  const ids = new Set();
+  if (!Array.isArray(items) || !items.every(p=>{
+    if (!p || typeof p.id !== 'string' || !p.id || ids.has(p.id) ||
+        typeof p.title !== 'string' || !p.title.trim() || typeof p.date !== 'string' ||
+        !/^\d{4}-\d{2}-\d{2}$/.test(p.date) || typeof p.done !== 'boolean' ||
+        typeof p.project !== 'string' || typeof p.note !== 'string') return false;
+    ids.add(p.id);
+    return true;
+  })) throw new Error('计划数据格式异常，已保留原数据。');
+  return items;
+}
+function renderPlans(){
+  const list = $('#plan-list'), error = $('#plan-load-error');
+  try {
+    plans = readPlans();
+    error.hidden = true;
+    $('#plan-new').disabled = false;
+  } catch {
+    error.textContent = '无法读取本地计划，请检查浏览器存储或备份后再试。';
+    error.hidden = false;
+    $('#plan-new').disabled = true;
+    list.replaceChildren();
+    return;
+  }
+  const today = todayStr(), completed = plans.filter(p=>p.done).length;
+  $('#plan-pending-total').textContent = plans.length - completed;
+  $('#plan-done-total').textContent = completed;
+  for (const tab of $$('[data-plan-filter]')) tab.setAttribute('aria-pressed',String(planFilter === tab.dataset.planFilter));
+  const groups = planFilter === 'done' ? [['done','已完成']] : [['late','已逾期'],['today','今天'],['later','即将到来']];
+  const rows = plans.filter(p=>p.done === (planFilter === 'done')).sort((a,b)=>
+    planFilter === 'done' ? (b.completedAt || 0) - (a.completedAt || 0) : a.date.localeCompare(b.date));
+  if (!rows.length) {
+    const message = planFilter === 'done' ? '还没有已完成的计划' : '没有待办计划';
+    const hint = planFilter === 'done' ? '勾选待办事项后，可以在这里回看。' : '新建一条计划，给下一件事安排日期。';
+    list.innerHTML = `<div class="empty"><span class="empty-icon"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg></span><h3>${message}</h3><p>${hint}</p></div>`;
+    return;
+  }
+  list.innerHTML = groups.map(([key,label])=>{
+    const items = rows.filter(p=>key === 'done' || (key === 'late' ? p.date < today : key === 'today' ? p.date === today : p.date > today));
+    if (!items.length) return '';
+    return `<section class="plan-group" data-group="${key}"><h2 class="plan-group-title">${label} <small>${items.length}</small></h2><ul>${items.map(planRowHTML).join('')}</ul></section>`;
+  }).join('');
+}
+function planRowHTML(p){
+  const title = esc(p.title);
+  return `<li class="plan-row${p.done ? ' is-done' : ''}" data-plan-id="${esc(p.id)}">
+    <label class="plan-check"><input type="checkbox" data-plan-action="toggle" ${p.done ? 'checked' : ''} aria-label="${p.done ? '移回待办' : '标为完成'}：${title}"></label>
+    <div class="plan-copy"><strong class="plan-name">${title}</strong>
+      <div class="plan-meta"><time datetime="${esc(p.date)}">${esc(p.date)}</time>${p.project ? '<span>'+esc(p.project)+'</span>' : ''}</div>
+      ${p.note ? '<p class="plan-note">'+esc(p.note)+'</p>' : ''}
+    </div>
+    <div class="plan-actions">
+      <button type="button" class="icon-btn" data-plan-action="edit" title="编辑计划" aria-label="编辑：${title}"><svg class="icon" aria-hidden="true"><use href="#i-edit"/></svg></button>
+      <button type="button" class="icon-btn del" data-plan-action="delete" title="删除计划" aria-label="删除：${title}"><svg class="icon" aria-hidden="true"><use href="#i-trash"/></svg></button>
+    </div>
+  </li>`;
+}
+async function changePlans(update){
+  const save = ()=>{
+    const items = readPlans();
+    update(items);
+    localStorage.setItem(PLAN_KEY,JSON.stringify(items));
+  };
+  if (navigator.locks) await navigator.locks.request(PLAN_KEY,save);
+  else save();
+  renderPlans();
+}
+function openPlanEditor(plan = null){
+  editingPlan = plan;
+  $('#plan-dialog-title').textContent = plan ? '编辑计划' : '新建计划';
+  $('#plan-title').value = plan?.title || '';
+  $('#plan-date').value = plan?.date || todayStr();
+  $('#plan-project').value = plan?.project || '';
+  $('#plan-note').value = plan?.note || '';
+  $('#plan-error').hidden = true;
+  $('#plan-dialog').showModal();
+}
+function focusPlanAction(id, action, previousIndex = -1){
+  if (store.ui.view !== 'plan') return;
+  const rows = $$('#plan-list [data-plan-id]');
+  const target = rows.find(row=>row.dataset.planId === id) || rows[Math.min(previousIndex,rows.length-1)];
+  (target?.querySelector('[data-plan-action="'+action+'"]') || $('#plan-new')).focus({preventScroll:true});
+}
+function initPlans(){
+  $('#plan-new').addEventListener('click',()=>openPlanEditor());
+  $('#plan-cancel').addEventListener('click',()=>$('#plan-dialog').close());
+  for (const btn of $$('[data-plan-filter]')) btn.addEventListener('click',()=>{
+    planFilter = btn.dataset.planFilter;
+    renderPlans();
+  });
+  $('#plan-form').addEventListener('submit',async e=>{
+    e.preventDefault();
+    if ($('#plan-save').disabled) return;
+    const fields = {
+      title:$('#plan-title').value.trim(), date:$('#plan-date').value,
+      project:$('#plan-project').value.trim(), note:$('#plan-note').value.trim()
+    };
+    const error = $('#plan-error');
+    if (!fields.title) {
+      error.textContent = '请填写计划事项。'; error.hidden = false;
+      $('#plan-title').focus(); return;
+    }
+    const prior = editingPlan, id = prior?.id || uid();
+    $('#plan-save').disabled = true;
+    try {
+      await changePlans(items=>{
+        if (!prior) { items.push({id,...fields,done:false,completedAt:null}); return; }
+        const current = items.find(p=>p.id === id);
+        if (!current || Object.keys(fields).some(key=>current[key] !== prior[key]))
+          throw new Error('这条计划已在其他页面更改，请重新打开后编辑。');
+        Object.assign(current,fields);
+      });
+      if (!prior && planFilter !== 'pending') { planFilter = 'pending'; renderPlans(); }
+      $('#plan-dialog').close();
+      focusPlanAction(id,'edit');
+      toast(prior ? '计划已更新' : '计划已添加');
+    } catch (err) {
+      error.textContent = err.name === 'Error' ? err.message : '保存计划失败，请检查浏览器存储后重试。';
+      error.hidden = false;
+    } finally { $('#plan-save').disabled = false; }
+  });
+  $('#plan-list').addEventListener('click',async e=>{
+    const action = e.target.closest('[data-plan-action]');
+    if (!action) return;
+    const row = action.closest('[data-plan-id]');
+    const id = row.dataset.planId;
+    const plan = plans.find(p=>p.id === id);
+    if (!plan) return;
+    const op = action.dataset.planAction;
+    if (op === 'edit') { openPlanEditor(plan); return; }
+    if (op === 'delete' && !confirm('删除计划「'+plan.title+'」？')) return;
+    const done = action.checked;
+    const previousIndex = $$('#plan-list [data-plan-id]').indexOf(row);
+    action.disabled = true;
+    try {
+      await changePlans(items=>{
+        const index = items.findIndex(p=>p.id === id);
+        if (index < 0) return;
+        if (op === 'delete') items.splice(index,1);
+        else Object.assign(items[index],{done,completedAt:done ? Date.now() : null});
+      });
+      toast(op === 'delete' ? '计划已删除' : done ? '计划已完成' : '已移回待办');
+    } catch {
+      renderPlans();
+      toast('更新计划失败，请检查浏览器存储后重试。',true);
+    }
+    focusPlanAction(id,op,previousIndex);
+  });
+  window.addEventListener('storage',e=>{
+    if ((e.key === PLAN_KEY || e.key === null) && store.ui.view === 'plan') renderPlans();
   });
 }
 
@@ -1992,6 +2407,7 @@ function showView(name){
   const active = tabs.find(tab=>tab.dataset.view === name) || tabs[0];
   if (active.dataset.view !== store.ui.view && $('#composer-dialog').open) closeComposer(true);
   if (active.dataset.view !== store.ui.view && $('#clock-dialog').open) $('#clock-dialog').close();
+  if (active.dataset.view !== store.ui.view && $('#plan-dialog').open) $('#plan-dialog').close();
   const hadTabFocus = document.activeElement?.matches('.tab');
   const focusedPanel = document.activeElement?.closest('[role="tabpanel"]');
   store.ui.view = active.dataset.view;
@@ -2006,6 +2422,7 @@ function showView(name){
   }
   if (hadTabFocus || focusedPanel?.hidden) active.focus({preventScroll:true});
   if (store.ui.view === 'review') renderReview();
+  if (store.ui.view === 'plan') renderPlans();
   if (store.ui.view === 'data') renderData();
   scheduleCover();
   refreshWorkClock();
@@ -2017,10 +2434,10 @@ function navigateView(name){
 }
 function showTimeline(filters){
   Object.assign(store.ui, { range:'all', category:'all', project:'', keyword:'', starOnly:false, customFrom:'', customTo:'' }, filters);
+  selectJournalWeek(filters.customFrom || filters.customTo || todayStr());
   navigateView('log');
   syncFiltersFromUI();
-  renderStats();
-  renderTimeline();
+  renderJournal(true);
   $('#journal-title').focus({preventScroll:true});
   $('#journal').scrollIntoView({block:'start'});
 }
@@ -2064,6 +2481,7 @@ function syncFiltersFromUI(){
   $('#fl-to').value = store.ui.customTo;
 }
 function init(){
+  initPlans();
   initCover();
   initWorkClock();
   $('.insight-picker').addEventListener('click',e=>{
@@ -2196,13 +2614,27 @@ function init(){
     if (name !== store.ui.view) showView(name);
   });
 
-  $('#fl-range').addEventListener('change', e=>{ store.ui.range = e.target.value; syncFiltersFromUI(); renderStats(); renderTimeline(); });
-  $('#fl-category').addEventListener('change', e=>{ store.ui.category = e.target.value; renderStats(); renderTimeline(); });
-  $('#fl-project').addEventListener('change', e=>{ store.ui.project = e.target.value; renderStats(); renderTimeline(); });
-  $('#fl-keyword').addEventListener('input', e=>{ store.ui.keyword = e.target.value; renderStats(); renderTimeline(); });
-  $('#fl-star').addEventListener('change', e=>{ store.ui.starOnly = e.target.checked; renderStats(); renderTimeline(); });
-  $('#fl-from').addEventListener('change', e=>{ store.ui.customFrom = e.target.value; renderStats(); renderTimeline(); });
-  $('#fl-to').addEventListener('change', e=>{ store.ui.customTo = e.target.value; renderStats(); renderTimeline(); });
+  for (const [selector,key] of [['#fl-range','range'],['#fl-category','category'],['#fl-project','project'],
+                                ['#fl-keyword','keyword'],['#fl-star','starOnly'],['#fl-from','customFrom'],['#fl-to','customTo']]) {
+    $(selector).addEventListener(key === 'keyword' ? 'input' : 'change', e=>{
+      store.ui[key] = key === 'starOnly' ? e.target.checked : e.target.value;
+      if (key === 'range') syncFiltersFromUI();
+      renderJournal(true);
+    });
+  }
+  $('.journal-week-controls').addEventListener('click', e=>{
+    const button = e.target.closest('button');
+    if (!button || button.disabled) return;
+    const current = weekStart(todayStr());
+    const start = store.ui.journalWeek || current;
+    const date = button.id === 'journal-current' ? current : shiftDays(start,button.id === 'journal-next' ? -7 : 7);
+    selectJournalWeek(date);
+    renderJournal();
+    if (button.disabled) {
+      const available = $('.journal-week-controls button:not(:disabled)');
+      if (available) available.focus({preventScroll:true});
+    }
+  });
 
   $$('#review-seg button').forEach(b=>b.addEventListener('click', ()=>{
     store.ui.reviewRange = b.dataset.period; renderReview();
