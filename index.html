@@ -624,6 +624,85 @@ html{scroll-padding-top:var(--clock-dock-height,110px)}
   .clock-dock .clock-buttons .btn{min-height:34px;padding:5px 8px;font-size:12px}
   .clock-dock #clock-time{font-size:22px}
 }
+
+.att-toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 18px;margin-bottom:14px}
+.att-toolbar label{font-weight:650}.att-month-controls{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+.att-toolbar input{width:auto;min-width:0;height:36px}
+.att-layout{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(310px,1fr);gap:14px;align-items:start}
+#att-editor-anchor{min-width:0}
+.attendance-backup{margin-top:14px;padding:14px 18px;border-radius:var(--radius);border:1px solid var(--line);background:var(--surface)}
+.attendance-backup summary{cursor:pointer;font-weight:600}
+.attendance-backup-actions{display:flex;gap:8px;flex-wrap:wrap}
+#att-backup-status:empty{display:none}
+#att-read-error{color:var(--danger)}
+@media(max-width:1080px){.att-layout{grid-template-columns:minmax(0,1.45fr) minmax(285px,1fr)}}
+@media(max-width:760px){.att-layout{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:560px){.tabs{gap:2px}.tabs .tab{flex-direction:column;gap:3px;font-size:12px;line-height:1.25}.tabs .tab .icon{width:15px;height:15px}.att-toolbar{gap:5px 10px;padding:10px 12px}}
+#attendance-calendar-panel{container-type:inline-size;min-width:0;display:grid;gap:14px;color:var(--text)}
+.att-month-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.att-stat,.att-calendar-card{border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);min-width:0}
+.att-stat{padding:15px 17px}
+.att-stat:first-child{background:var(--tint);border-color:var(--line)}
+.att-stat h3{margin:0 0 4px;color:var(--muted);font-size:12px;font-weight:600}
+.att-stat-value{display:flex;align-items:baseline;flex-wrap:wrap;gap:2px 5px;min-height:35px}
+.att-stat-value strong{font-size:clamp(22px,3.4cqw,32px);font-weight:680;line-height:1.15;font-variant-numeric:tabular-nums;letter-spacing:-.045em}
+.att-stat-value small{font-size:12px;color:var(--muted);margin-right:2px}
+.att-stat p{font-size:11px;color:var(--dim);margin:3px 0 0;overflow-wrap:anywhere}
+.att-calendar-card{padding:17px}
+.att-calendar-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:3px 14px;margin-bottom:15px}
+.att-calendar-head h2{font-size:16px;margin:0}
+.att-calendar-head span,.att-cal-hint{font-size:12px;color:var(--muted)}
+.att-weekdays,.att-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.att-weekdays{margin-bottom:5px;text-align:center;color:var(--muted);font-size:12px}
+.att-day{position:relative;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;min-width:0;min-height:65px;gap:4px;padding:6px 8px;text-align:left;line-height:1.25;cursor:pointer;border:1px solid var(--line-soft);border-radius:7px;background:var(--surface-2);color:var(--text)}
+.att-day:hover{border-color:var(--accent)}
+.att-day[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--tint)}
+.att-day-number{display:flex;align-items:center;gap:3px;font-size:14px;line-height:1.2;font-weight:620;font-variant-numeric:tabular-nums}
+.att-day[aria-current="date"] .att-day-number{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+.att-day[aria-current="date"] .att-day-number::after{content:"今";font-size:9px}
+.att-day-mark{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--muted);max-width:100%}
+.att-day-mark::before{content:"";width:6px;height:6px;flex:none;border-radius:50%;background:currentColor}
+.att-day[data-state="work"] .att-day-mark{color:var(--ok)}
+.att-day[data-state="partial"] .att-day-mark,.att-day[data-state="leave"] .att-day-mark{color:var(--warn)}
+.att-day-hours{display:none;font-variant-numeric:tabular-nums}
+@container(min-width:640px){.att-day-hours{display:inline}.att-day-hours + .att-work-label{display:none}}
+.att-cal-hint{margin:12px 0 0}
+@container(max-width:560px){
+  .att-month-stats{gap:5px}.att-stat{padding:10px 8px}.att-stat-value{min-height:27px;gap:1px 3px}
+  .att-stat-value strong{font-size:21px}.att-stat-value small{font-size:10px}
+  .att-calendar-card{padding:12px 8px}.att-calendar-head{margin-bottom:10px}
+  .att-day{min-height:49px;align-items:center;padding:5px 1px}.att-day-mark{font-size:10px}
+  .att-day-mark::before,.att-day-hours{display:none}.att-days,.att-weekdays{gap:2px}
+}
+.att-manual{min-width:0;align-self:start}
+.att-form-head,.att-form-actions,.att-input-head{display:flex;align-items:center;justify-content:space-between;gap:9px;flex-wrap:wrap}
+.att-form-head{padding:15px 18px;border-bottom:1px solid var(--line-soft)}
+.att-form-head h2{font-size:16px;margin:0}
+.att-draft-label{font-size:12px;color:var(--warn)}
+#attendance-form{padding:16px 18px}
+#attendance-form [hidden],.att-form-head [hidden]{display:none!important}
+#attendance-form fieldset{padding:0;margin:0;min-width:0;border:0}
+.att-form-stack{display:grid;gap:14px}
+.att-work-fields{display:grid;gap:12px}
+.att-day-kind{display:flex;align-items:center;flex-wrap:wrap;gap:5px}
+.att-day-kind legend{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px}
+.att-day-kind label{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:6px;border:1px solid var(--line);color:var(--muted);font-size:13px;cursor:pointer}
+.att-day-kind label:has(input:checked){color:var(--accent);border-color:var(--accent);background:var(--tint)}
+.att-day-kind input{margin:0;accent-color:var(--accent)}
+.att-form-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.att-input-head{gap:5px}
+.att-now{padding:3px 5px;border:0;background:transparent;color:var(--accent);font-size:12px;line-height:1.4;border-radius:4px}
+.att-now:hover{background:var(--tint)}
+.att-calculated{font-size:13px;color:var(--muted);padding:8px 11px;background:var(--surface-2);border-radius:8px}
+.att-form-actions{border-top:1px solid var(--line-soft);padding-top:13px;justify-content:flex-end}
+#attendance-remove{margin-right:auto;color:var(--danger)}
+.att-manual-error{margin:0;color:var(--danger);font-size:13px}
+@media(max-width:560px){
+  .att-form-head,#attendance-form{padding:13px}
+  .att-form-pair{gap:8px}
+  .att-now,.att-day-kind label{min-height:34px}
+  .att-form-actions .btn{min-height:42px}
+}
 </style>
 </head>
 <body>
@@ -655,6 +734,9 @@ html{scroll-padding-top:var(--clock-dock-height,110px)}
     </button>
     <button class="tab" id="tab-plan" role="tab" data-view="plan" aria-controls="view-plan" aria-selected="false" tabindex="-1" type="button">
       <svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg>计划
+    </button>
+    <button class="tab" id="tab-attendance" role="tab" data-view="attendance" aria-controls="view-attendance" aria-selected="false" tabindex="-1" type="button">
+      <svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4m10-4v4M3 10h18m-13 5 2 2 5-5"/></svg>考勤
     </button>
     <button class="tab" id="tab-review" role="tab" data-view="review" aria-controls="view-review" aria-selected="false" tabindex="-1" type="button">
       <svg class="icon" aria-hidden="true"><use href="#i-chart"/></svg>复盘报告
@@ -813,6 +895,84 @@ html{scroll-padding-top:var(--clock-dock-height,110px)}
       </div>
     </section>
 
+    <section id="view-attendance" role="tabpanel" aria-labelledby="tab-attendance" hidden>
+      <div class="card att-toolbar" id="att-month-toolbar">
+        <label for="att-month">考勤月份</label>
+        <div class="att-month-controls">
+          <button type="button" class="btn btn-sm" data-att-step="-1" aria-label="上个月">‹</button>
+          <input type="month" id="att-month" min="1000-01" max="9999-12">
+          <button type="button" class="btn btn-sm" data-att-step="1" aria-label="下个月">›</button>
+          <button type="button" class="btn btn-sm" id="att-today">回到今天</button>
+        </div>
+      </div>
+      <p id="att-read-error" role="alert" hidden></p>
+      <div class="att-layout">
+<section id="attendance-calendar-panel" aria-label="月度考勤汇总">
+  <div class="att-month-stats" id="attendance-month-stats"></div>
+  <section class="att-calendar-card" aria-labelledby="attendance-calendar-title">
+    <header class="att-calendar-head"><h2 id="attendance-calendar-title">考勤日历</h2><span id="attendance-calendar-counts"></span></header>
+    <div class="att-weekdays" aria-hidden="true"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div>
+    <div class="att-days" id="attendance-calendar-days" role="group" aria-label="选择考勤日期"></div>
+    <p class="att-cal-hint">点选日期可填写或修改考勤。空白日期尚未记录。</p>
+  </section>
+</section>
+        <div id="att-editor-anchor">
+<section class="card att-manual" aria-labelledby="att-entry-heading">
+  <div class="att-form-head">
+    <h2 id="att-entry-heading">每日考勤</h2>
+    <span id="att-draft-label" class="att-draft-label" hidden>有未保存的修改</span>
+  </div>
+  <form id="attendance-form" autocomplete="off">
+    <fieldset id="att-edit-fields">
+      <div class="att-form-stack">
+        <div class="field"><label for="attendance-date">考勤日期</label><input type="date" id="attendance-date" required min="1000-01-01" max="9999-12-31"></div>
+        <fieldset class="att-day-kind">
+          <legend>日期类型</legend>
+          <label><input type="radio" name="attendance-kind" value="work" checked>工作</label>
+          <label><input type="radio" name="attendance-kind" value="rest">休息</label>
+          <label><input type="radio" name="attendance-kind" value="leave">请假</label>
+        </fieldset>
+        <fieldset id="att-work-fields">
+          <div class="att-work-fields">
+            <div class="att-form-pair">
+              <div class="field"><div class="att-input-head"><label for="attendance-start">实际上班</label><button class="att-now" data-att-now="attendance-start" type="button" aria-label="上班时间填入当前时刻">填现在</button></div>
+                <input type="time" id="attendance-start" required>
+              </div>
+              <div class="field"><div class="att-input-head"><label for="attendance-end">实际下班</label><button class="att-now" data-att-now="attendance-end" type="button" aria-label="下班时间填入当前时刻">填现在</button></div>
+                <input type="time" id="attendance-end" aria-describedby="att-calculated">
+              </div>
+            </div>
+            <label class="checkrow"><input type="checkbox" id="attendance-next-day">下班在次日</label>
+            <div class="att-form-pair">
+              <div class="field"><label for="attendance-break">扣除休息（分钟）</label><input id="attendance-break" type="number" min="0" max="1439" step="1" placeholder="0"></div>
+              <div class="field"><label for="attendance-overtime">其中加班（分钟，选填）</label><input id="attendance-overtime" type="number" min="0" step="1" placeholder="选填"></div>
+            </div>
+            <output class="att-calculated" id="att-calculated" aria-live="off"></output>
+          </div>
+        </fieldset>
+        <div class="field"><label for="attendance-note">备注（选填）</label><textarea id="attendance-note" rows="2" maxlength="500"></textarea></div>
+        <p class="att-manual-error" id="att-form-error" role="alert" hidden></p>
+        <div class="att-form-actions">
+          <button id="attendance-remove" type="button" class="btn btn-ghost" hidden>删除当天记录</button>
+          <button id="attendance-save" type="submit" class="btn btn-primary">保存考勤</button>
+        </div>
+      </div>
+    </fieldset>
+  </form>
+</section>
+        </div>
+      </div>
+<details class="attendance-backup">
+  <summary>考勤备份与还原</summary>
+  <p class="hint">可将手填考勤保存为 JSON 文件。还原时按日期合并，已有日期会保留。每个文件最多 5 MiB、10,000 天。</p>
+  <div class="attendance-backup-actions">
+    <button class="btn btn-sm" id="att-backup-export" type="button">导出考勤备份</button>
+    <button class="btn btn-sm" id="att-backup-import" type="button">还原考勤备份</button>
+    <input id="att-backup-file" type="file" accept=".json,application/json" aria-label="选择考勤备份文件" hidden>
+  </div>
+  <p class="hint" id="att-backup-status" role="status" aria-live="polite"></p>
+</details>
+    </section>
     <!-- ================= 复盘 ================= -->
     <section id="view-review" role="tabpanel" aria-labelledby="tab-review" hidden>
       <div class="card" style="padding:16px 18px;margin-bottom:18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
@@ -1116,7 +1276,8 @@ function load(){
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) { store.records = []; return 0; }
     const parsed = JSON.parse(raw);
-    const list = Array.isArray(parsed) ? parsed : (Array.isArray(parsed.records) ? parsed.records : []);
+    if (parsed?.format === ATTENDANCE_BACKUP_FORMAT) throw new Error('这是考勤备份，请在考勤页还原。');
+  const list = Array.isArray(parsed) ? parsed : (Array.isArray(parsed.records) ? parsed.records : []);
     store.records = list.map(normalizeRecord).filter(Boolean);
   } catch (e) {
     store.records = [];
@@ -1914,6 +2075,7 @@ function importFromText(text, mode){
   let parsed;
   try { parsed = JSON.parse(text); }
   catch(e){ throw new Error('不是合法的 JSON 文件'); }
+  if (parsed?.format === ATTENDANCE_BACKUP_FORMAT) throw new Error('这是考勤备份，请在考勤页还原。');
   const list = Array.isArray(parsed) ? parsed : (parsed && Array.isArray(parsed.records) ? parsed.records : null);
   if (!list) throw new Error('文件里没找到 records 数组');
   const incoming = list.map(normalizeRecord).filter(Boolean);
@@ -2401,10 +2563,404 @@ function initPlans(){
   });
 }
 
+/* ---------- 手填考勤 ---------- */
+const ATTENDANCE_KEY = 'workbench.attendance.v1';
+let attendanceDate = todayStr();
+
+function validAttendanceDate(date){
+  return typeof date === 'string' && /^[1-9]\d{3}-(0[1-9]|1[0-2])-([0-2]\d|3[01])$/.test(date)
+    && fmtDate(parseDate(date)) === date;
+}
+function attendanceTimeMinutes(time){
+  if (typeof time !== 'string' || !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) throw new Error('请填写有效的上下班时间。');
+  const [hours,minutes] = time.split(':').map(Number);
+  return hours*60+minutes;
+}
+function attendanceWorkedMinutes(record){
+  if (record.kind !== 'work') return null;
+  const start = attendanceTimeMinutes(record.start);
+  if (!Number.isInteger(record.breakMinutes) || record.breakMinutes < 0 || record.breakMinutes >= 1440)
+    throw new Error('休息时长应为 0 至 1439 的整数分钟。');
+  if (!record.end) return null;
+  const span = attendanceTimeMinutes(record.end) + (record.nextDay ? 1440 : 0) - start;
+  if (span <= 0) throw new Error('下班时间须晚于上班时间，跨夜请勾选次日下班。');
+  if (span > 1440) throw new Error('单次考勤不能超过 24 小时，请检查次日选项。');
+  if (record.breakMinutes >= span) throw new Error('休息分钟须少于本班的总时长。');
+  return span-record.breakMinutes;
+}
+function attendanceOvertimeMinutes(record){ return record.kind === 'work' ? record.overtimeMinutes : null; }
+function normalizeAttendanceEntry(raw){
+  if (!raw || !validAttendanceDate(raw.date) || !['work','rest','leave'].includes(raw.kind)) throw new Error('日期或考勤类型无效。');
+  if (typeof raw.note !== 'string' || raw.note.length > 500) throw new Error('备注最多可填 500 字。');
+  if (typeof raw.start !== 'string' || typeof raw.end !== 'string' || typeof raw.nextDay !== 'boolean'
+    || !Number.isInteger(raw.breakMinutes)) throw new Error('时间字段格式无效。');
+  const {date,kind,start,end,nextDay,breakMinutes} = raw;
+  const overtimeMinutes = raw.overtimeMinutes ?? null;
+  const entry = {date,kind,start,end,nextDay,breakMinutes,overtimeMinutes,note:raw.note.trim()};
+  if (kind !== 'work' && (start || end || nextDay || breakMinutes || overtimeMinutes !== null))
+    throw new Error('休息和请假记录只能填写日期与备注。');
+  if (!end && nextDay) throw new Error('请填写次日下班时间。');
+  const worked = attendanceWorkedMinutes(entry);
+  if (overtimeMinutes !== null && (!Number.isInteger(overtimeMinutes) || worked === null || overtimeMinutes < 0 || overtimeMinutes > worked))
+    throw new Error('加班分钟应为有效工时内的非负整数。');
+  return entry;
+}
+function readAttendanceRecords(){
+  const raw = localStorage.getItem(ATTENDANCE_KEY);
+  if (raw === null) return {};
+  try {
+    const saved = JSON.parse(raw);
+    if (!saved || Array.isArray(saved) || typeof saved !== 'object') throw new Error();
+    const entries = Object.entries(saved).map(([date,item])=>{
+      if (date !== item?.date) throw new Error();
+      return [date,normalizeAttendanceEntry(item)];
+    });
+    return Object.fromEntries(entries);
+  } catch { throw new Error('无法读取已有考勤。原数据已保留，请先检查浏览器存储。'); }
+}
+async function changeAttendanceEntries(update){
+  const write = ()=>{
+    const current = readAttendanceRecords();
+    const result = update(current);
+    try { localStorage.setItem(ATTENDANCE_KEY,JSON.stringify(current)); }
+    catch { throw new Error('未能保存，请检查浏览器可用空间和存储权限。'); }
+    return result;
+  };
+  return navigator.locks ? navigator.locks.request(ATTENDANCE_KEY,write) : write();
+}
+function assertAttendanceUnchanged(current,previous){
+  if (JSON.stringify(current || null) !== JSON.stringify(previous || null))
+    throw new Error('这一天的考勤已在其他页面更改。请重新选择日期后再编辑。');
+}
+async function saveAttendanceRecord(raw,previous){
+  const entry = normalizeAttendanceEntry(raw);
+  await changeAttendanceEntries(records=>{
+    assertAttendanceUnchanged(records[entry.date],previous);
+    records[entry.date] = entry;
+  });
+  refreshAttendance(attendanceDate === entry.date);
+}
+async function deleteAttendanceRecord(date,previous){
+  await changeAttendanceEntries(records=>{
+    assertAttendanceUnchanged(records[date],previous);
+    delete records[date];
+  });
+  refreshAttendance(attendanceDate === date);
+}
+async function mergeAttendanceRecords(entries){
+  const incoming = entries.map(normalizeAttendanceEntry);
+  const result = await changeAttendanceEntries(records=>{
+    let added = 0;
+    for (const entry of incoming){
+      if (!Object.hasOwn(records,entry.date)) { records[entry.date] = entry; added++; }
+    }
+    return {added,skipped:incoming.length-added};
+  });
+  refreshAttendance();
+  return result;
+}
+function refreshAttendance(force=false){
+  const month = attendanceDate.slice(0,7);
+  $('#att-month').value = month;
+  try {
+    const records = readAttendanceRecords();
+    renderAttendanceCalendar(month,records,attendanceDate);
+    renderAttendanceForm(attendanceDate,records[attendanceDate] || null,force);
+    $('#att-read-error').hidden = true;
+  } catch (error) {
+    const notice = $('#att-read-error');
+    notice.textContent = error.message || '无法读取考勤数据，请检查浏览器存储。';
+    notice.hidden = false;
+  }
+}
+function selectAttendanceDate(date){
+  if (!validAttendanceDate(date) || (date !== attendanceDate && !attendanceFormCanLeave())) return false;
+  const changed = date !== attendanceDate;
+  attendanceDate = date;
+  refreshAttendance(changed);
+  return true;
+}
+function chooseAttendanceMonth(month){
+  if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month) || !selectAttendanceDate(month === todayStr().slice(0,7) ? todayStr() : month+'-01'))
+    $('#att-month').value = attendanceDate.slice(0,7);
+}
+function initAttendance(){
+  initAttendanceForm();
+  initAttendanceBackup();
+  $('#att-month').addEventListener('change',e=>chooseAttendanceMonth(e.target.value));
+  $('#att-today').addEventListener('click',()=>selectAttendanceDate(todayStr()));
+  $('#att-month-toolbar').addEventListener('click',e=>{
+    const button = e.target.closest('[data-att-step]');
+    if (!button) return;
+    const first = parseDate(attendanceDate.slice(0,7)+'-01');
+    first.setMonth(first.getMonth()+Number(button.dataset.attStep));
+    chooseAttendanceMonth(fmtDate(first).slice(0,7));
+  });
+  $('#attendance-calendar-days').addEventListener('click',e=>{
+    const button = e.target.closest('[data-att-date]');
+    if (!button || !selectAttendanceDate(button.dataset.attDate)) return;
+    if (matchMedia('(max-width:760px)').matches) $('#att-editor-anchor').scrollIntoView({block:'start'});
+    else $('#attendance-calendar-days [data-att-date="'+attendanceDate+'"]')?.focus({preventScroll:true});
+  });
+  window.addEventListener('storage',e=>{
+    if (store.ui.view === 'attendance' && (e.key === ATTENDANCE_KEY || e.key === null)) refreshAttendance();
+  });
+}
+
+function attendanceCalendarDuration(minutes){
+  const hours = Math.floor(minutes/60), remainder = minutes%60;
+  return (hours ? hours+'小时' : '') + (remainder || !hours ? remainder+'分钟' : '');
+}
+function attendanceCalendarMetric(title,minutes,detail){
+  let value = '<strong>—</strong>';
+  if (minutes !== null) {
+    const hours = Math.floor(minutes/60), rest = minutes%60;
+    value = (hours ? '<strong>'+hours+'</strong><small>小时</small>' : '') +
+      (rest || !hours ? '<strong>'+rest+'</strong><small>分钟</small>' : '');
+  }
+  return '<div class="att-stat"><h3>'+title+'</h3><div class="att-stat-value">'+value+'</div><p>'+detail+'</p></div>';
+}
+function renderAttendanceCalendar(month,records,selectedDate){
+  if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) return;
+  const first = new Date(month+'-01T12:00:00');
+  if (!Number.isFinite(first.getTime())) return;
+  const last = new Date(first);
+  last.setMonth(last.getMonth()+1,0);
+  const offset = (first.getDay()+6)%7;
+  const today = todayStr(), count = last.getDate();
+  const buttons = [];
+  let workCount = 0, completeCount = 0, workedSum = 0, overtimeCount = 0, overtimeSum = 0, restCount = 0, leaveCount = 0;
+  for (let number=1; number<=count; number++) {
+    const date = month+'-'+pad(number), record = records?.[date];
+    let state = '', label = '', details = '', hours = '';
+    if (record) {
+      const overtime = attendanceOvertimeMinutes(record);
+      if (Number.isFinite(overtime)) { overtimeCount++; overtimeSum += overtime; }
+      if (record.kind === 'work') {
+        workCount++;
+        const minutes = attendanceWorkedMinutes(record);
+        if (Number.isFinite(minutes)) {
+          completeCount++; workedSum += minutes;
+          state = 'work'; label = '出勤'; hours = attendanceCalendarDuration(minutes);
+          details = '，净工时 '+hours;
+        } else {
+          state = 'partial'; label = '待补';
+          details = record.start && !record.end ? '，缺少下班时间' : record.end && !record.start ? '，缺少上班时间' : '，工时未完整';
+        }
+      } else if (record.kind === 'rest') { state = 'rest'; label = '休息'; restCount++; }
+      else if (record.kind === 'leave') { state = 'leave'; label = '请假'; leaveCount++; }
+      if (Number.isFinite(overtime)) details += '，已记加班 '+attendanceCalendarDuration(overtime);
+    }
+    const selected = date===selectedDate, current = date===today ? ' aria-current="date"' : '';
+    const text = date+'，'+WEEKDAYS[(offset+number)%7]+'，'+(label || '未记录，可补录')+details;
+    const readable = hours ? '<span class="att-day-hours">'+hours.replace('小时','时').replace('分钟','分')+'</span><span class="att-work-label">出勤</span>' : label;
+    const mark = label ? '<span class="att-day-mark">'+readable+'</span>' : '';
+    buttons.push('<button type="button" class="att-day" data-att-date="'+date+'" data-state="'+state+'" aria-label="'+esc(text)+'" title="'+esc(text)+'" aria-pressed="'+selected+'"'+current+' tabindex="-1"><span class="att-day-number">'+number+'</span>'+mark+'</button>');
+  }
+  $('#attendance-month-stats').innerHTML =
+    attendanceCalendarMetric('已记工时',completeCount ? workedSum : null,'计入 '+completeCount+' 天完整记录')+
+    attendanceCalendarMetric('已记加班',overtimeCount ? overtimeSum : null,overtimeCount ? '已填写 '+overtimeCount+' 天' : '本月尚未填写')+
+    '<div class="att-stat"><h3>出勤记录</h3><div class="att-stat-value"><strong>'+workCount+'</strong><small>天</small></div><p>待补全 '+(workCount-completeCount)+' 天</p></div>';
+  $('#attendance-calendar-counts').textContent = '休息 '+restCount+' 天 · 请假 '+leaveCount+' 天';
+  const grid = $('#attendance-calendar-days');
+  const priorFocusDate = grid.contains(document.activeElement) ? document.activeElement.dataset.attDate : '';
+  grid.innerHTML = '<span aria-hidden="true"></span>'.repeat(offset)+buttons.join('');
+  const items = Array.from(grid.querySelectorAll('[data-att-date]'));
+  const focusDay = items.find(b=>b.dataset.attDate===priorFocusDate) || items.find(b=>b.dataset.attDate===selectedDate) ||
+    items.find(b=>b.dataset.attDate===today) || items[0];
+  focusDay.tabIndex = 0;
+  if (priorFocusDate) focusDay.focus({preventScroll:true});
+  grid.onkeydown = event=>{
+    const index = items.indexOf(event.target);
+    const moves = {ArrowLeft:-1,ArrowRight:1,ArrowUp:-7,ArrowDown:7};
+    if (index<0 || !Object.hasOwn(moves,event.key) || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return;
+    event.preventDefault();
+    const next = items[index+moves[event.key]];
+    if (!next) return;
+    items.forEach(b=>b.tabIndex = b===next ? 0 : -1);
+    next.focus();
+  };
+}
+let attendanceEditorDate = '';
+let attendanceEditorOriginal = null;
+let attendanceEditorBaseline = '';
+let attendanceEditorBusy = false;
+function attendanceFormValues(){
+  const kind = $('input[name="attendance-kind"]:checked').value;
+  const work = kind === 'work';
+  const start = work ? $('#attendance-start').value : '';
+  const end = work ? $('#attendance-end').value : '';
+  const complete = Boolean(start && end);
+  const overtime = $('#attendance-overtime');
+  return {
+    date:attendanceEditorDate,kind,start,end,
+    nextDay:Boolean(end && $('#attendance-next-day').checked),
+    breakMinutes:work ? Number($('#attendance-break').value || 0) : 0,
+    overtimeMinutes:complete && overtime.value !== '' ? overtime.valueAsNumber : null,
+    note:$('#attendance-note').value
+  };
+}
+function attendanceFormDirty(){
+  return Boolean(attendanceEditorDate && JSON.stringify(attendanceFormValues()) !== attendanceEditorBaseline);
+}
+function attendanceFormCanLeave(){
+  if (attendanceEditorBusy) return false;
+  if (!attendanceFormDirty()) return true;
+  if (!window.confirm('离开会放弃当天尚未保存的修改，确定离开？')) return false;
+  renderAttendanceForm(attendanceEditorDate,attendanceEditorOriginal,true);
+  return true;
+}
+function refreshAttendanceForm(){
+  const record = attendanceFormValues(), work = record.kind === 'work';
+  const complete = Boolean(record.start && record.end);
+  const fields = $('#att-work-fields');
+  fields.hidden = !work;
+  fields.disabled = !work;
+  $('#attendance-next-day').disabled = !record.end;
+  $('#attendance-overtime').disabled = !complete;
+  $('#att-draft-label').hidden = !attendanceFormDirty();
+  if (!work) return;
+  let text = '可先保存上班时间，再补记下班。';
+  if (complete) {
+    try {
+      const minutes = attendanceWorkedMinutes({...record,overtimeMinutes:null});
+      const hours = Math.floor(minutes / 60), rest = minutes % 60;
+      text = '有效工时 · ' + (hours ? hours+' 小时' : '') + (hours && rest ? ' ' : '') + (rest || !hours ? rest+' 分钟' : '');
+    } catch (err) { text = err.message; }
+  }
+  $('#att-calculated').textContent = text;
+}
+function renderAttendanceForm(date,record,force=false){
+  if (!force && attendanceEditorDate === date && attendanceFormDirty()) return;
+  attendanceEditorDate = date;
+  attendanceEditorOriginal = record || null;
+  $('#attendance-date').value = date;
+  for (const input of $$('input[name="attendance-kind"]')) input.checked = input.value === (record?.kind || 'work');
+  $('#attendance-start').value = record?.start || '';
+  $('#attendance-end').value = record?.end || '';
+  $('#attendance-next-day').checked = Boolean(record?.nextDay);
+  $('#attendance-break').value = record?.breakMinutes || '';
+  $('#attendance-overtime').value = record?.overtimeMinutes ?? '';
+  $('#attendance-note').value = record?.note || '';
+  $('#attendance-remove').hidden = !record;
+  $('#att-form-error').hidden = true;
+  attendanceEditorBaseline = JSON.stringify(attendanceFormValues());
+  refreshAttendanceForm();
+}
+async function commitAttendanceForm(remove){
+  if (attendanceEditorBusy || !attendanceEditorDate) return;
+  const error = $('#att-form-error');
+  error.hidden = true;
+  if (remove && (!attendanceEditorOriginal || !window.confirm('确定删除 '+attendanceEditorDate+' 的考勤记录？'))) return;
+  try {
+    const record = attendanceFormValues();
+    if (!remove && record.kind === 'work'){
+      if (!record.start) throw new Error('请填写实际上班时间。');
+      const minutes = attendanceWorkedMinutes(record);
+      if (record.overtimeMinutes !== null && (!Number.isSafeInteger(record.overtimeMinutes) ||
+          record.overtimeMinutes < 0 || minutes === null || record.overtimeMinutes > minutes))
+        throw new Error('自记加班请填写 0 至有效工时之间的整数分钟。');
+    }
+    attendanceEditorBusy = true;
+    $('#att-edit-fields').disabled = true;
+    if (remove) await deleteAttendanceRecord(attendanceEditorDate,attendanceEditorOriginal);
+    else await saveAttendanceRecord(record,attendanceEditorOriginal);
+    toast(remove ? '当天考勤已删除' : '当天考勤已保存');
+  } catch (err) {
+    error.textContent = err.message || '写入失败，请检查本地存储后重试。';
+    error.hidden = false;
+  } finally {
+    attendanceEditorBusy = false;
+    $('#att-edit-fields').disabled = false;
+  }
+}
+function initAttendanceForm(){
+  const form = $('#attendance-form');
+  form.addEventListener('input',event=>{
+    if (event.target.id === 'attendance-date') return;
+    $('#att-form-error').hidden = true;
+    refreshAttendanceForm();
+  });
+  $('#attendance-date').addEventListener('change',event=>{
+    const date = event.target.value;
+    event.target.value = attendanceEditorDate;
+    if (date && date !== attendanceEditorDate) selectAttendanceDate(date);
+  });
+  form.addEventListener('click',event=>{
+    const button = event.target.closest('[data-att-now]');
+    if (!button) return;
+    const now = new Date();
+    const input = document.getElementById(button.dataset.attNow);
+    input.value = pad(now.getHours())+':'+pad(now.getMinutes());
+    input.dispatchEvent(new Event('input',{bubbles:true}));
+  });
+  form.addEventListener('submit',event=>{event.preventDefault(); commitAttendanceForm(false);});
+  $('#attendance-remove').addEventListener('click',()=>commitAttendanceForm(true));
+}
+const ATTENDANCE_BACKUP_FORMAT = 'personal-workbench.attendance';
+const ATTENDANCE_BACKUP_MAX_DAYS = 10000;
+const ATTENDANCE_BACKUP_MAX_BYTES = 5 * 1024 * 1024;
+
+function parseAttendanceBackup(source){
+  let envelope;
+  try { envelope = JSON.parse(source.replace(/^\uFEFF/,'')); }
+  catch { throw new Error('无法解析 JSON，请选择完整的考勤备份文件。'); }
+  if (envelope?.format !== ATTENDANCE_BACKUP_FORMAT)
+    throw new Error('请选择由「导出考勤备份」生成的 JSON 文件。');
+  if (envelope.version !== 1) throw new Error('此考勤备份版本暂不支持。');
+  if (!Array.isArray(envelope.records)) throw new Error('考勤备份缺少有效的 records 列表。');
+  if (envelope.records.length > ATTENDANCE_BACKUP_MAX_DAYS) throw new Error('考勤备份超过 10,000 天上限。');
+  return envelope.records;
+}
+
+function initAttendanceBackup(){
+  const output = document.getElementById('att-backup-export');
+  const restore = document.getElementById('att-backup-import');
+  const fileInput = document.getElementById('att-backup-file');
+  const status = document.getElementById('att-backup-status');
+
+  output.addEventListener('click',async ()=>{
+    output.disabled = true;
+    try {
+      const byDate = await readAttendanceRecords();
+      const entries = Object.entries(byDate);
+      if (entries.length > ATTENDANCE_BACKUP_MAX_DAYS) throw new Error('考勤记录超过 10,000 天上限。');
+      const records = entries.sort(([a],[b])=>a.localeCompare(b)).map(([date,record])=>({...record,date}));
+      const json = JSON.stringify({format:ATTENDANCE_BACKUP_FORMAT,version:1,exportedAt:new Date().toISOString(),records},null,2);
+      if (new Blob([json]).size > ATTENDANCE_BACKUP_MAX_BYTES) throw new Error('考勤备份超过 5 MiB 上限。');
+      if (!downloadFile('手填考勤备份_'+todayStr()+'.json',json,'application/json;charset=utf-8'))
+        throw new Error('请检查浏览器的下载权限后重试。');
+      status.textContent = '已生成 '+records.length+' 天的考勤备份。';
+    } catch (error) {
+      status.textContent = '导出失败。'+(error.message || '请重试。');
+    } finally { output.disabled = false; }
+  });
+
+  restore.addEventListener('click',()=>fileInput.click());
+  fileInput.addEventListener('change',async ()=>{
+    const file = fileInput.files[0];
+    if (!file || restore.disabled) return;
+    restore.disabled = true;
+    fileInput.value = '';
+    status.textContent = '正在读取考勤备份…';
+    try {
+      if (file.size > ATTENDANCE_BACKUP_MAX_BYTES) throw new Error('请选择 5 MiB 以内的考勤备份。');
+      const records = parseAttendanceBackup(await file.text());
+      const {added,skipped} = await mergeAttendanceRecords(records);
+      status.textContent = '还原完成，新增 '+added+' 天，跳过已有日期 '+skipped+' 天。';
+    } catch (error) {
+      status.textContent = '还原失败。'+(error.message || '请检查文件后重试。');
+    } finally { restore.disabled = false; }
+  });
+}
 /* ---------- 视图 / 事件 ---------- */
 function showView(name){
   const tabs = $$('.tab');
   const active = tabs.find(tab=>tab.dataset.view === name) || tabs[0];
+  if (store.ui.view === 'attendance' && active.dataset.view !== 'attendance' && !attendanceFormCanLeave()) {
+    history.replaceState(null,'','#attendance');
+    return;
+  }
   if (active.dataset.view !== store.ui.view && $('#composer-dialog').open) closeComposer(true);
   if (active.dataset.view !== store.ui.view && $('#clock-dialog').open) $('#clock-dialog').close();
   if (active.dataset.view !== store.ui.view && $('#plan-dialog').open) $('#plan-dialog').close();
@@ -2423,6 +2979,7 @@ function showView(name){
   if (hadTabFocus || focusedPanel?.hidden) active.focus({preventScroll:true});
   if (store.ui.view === 'review') renderReview();
   if (store.ui.view === 'plan') renderPlans();
+  if (store.ui.view === 'attendance') refreshAttendance();
   if (store.ui.view === 'data') renderData();
   scheduleCover();
   refreshWorkClock();
@@ -2433,9 +2990,10 @@ function navigateView(name){
   showView(name);
 }
 function showTimeline(filters){
+  navigateView('log');
+  if (store.ui.view !== 'log') return;
   Object.assign(store.ui, { range:'all', category:'all', project:'', keyword:'', starOnly:false, customFrom:'', customTo:'' }, filters);
   selectJournalWeek(filters.customFrom || filters.customTo || todayStr());
-  navigateView('log');
   syncFiltersFromUI();
   renderJournal(true);
   $('#journal-title').focus({preventScroll:true});
@@ -2481,6 +3039,7 @@ function syncFiltersFromUI(){
   $('#fl-to').value = store.ui.customTo;
 }
 function init(){
+  initAttendance();
   initPlans();
   initCover();
   initWorkClock();
