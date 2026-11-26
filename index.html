@@ -635,6 +635,9 @@ html{scroll-padding-top:var(--clock-dock-height,110px)}
 .attendance-backup summary{cursor:pointer;font-weight:600}
 .attendance-backup-actions{display:flex;gap:8px;flex-wrap:wrap}
 #att-backup-status:empty{display:none}
+#att-backup-text{width:100%;margin-block:6px;resize:vertical}
+.att-backup-paste{margin-top:12px}
+.att-backup-paste label{display:block;margin-top:8px}
 #att-read-error{color:var(--danger)}
 @media(max-width:1080px){.att-layout{grid-template-columns:minmax(0,1.45fr) minmax(285px,1fr)}}
 @media(max-width:760px){.att-layout{grid-template-columns:minmax(0,1fr)}}
@@ -981,6 +984,12 @@ html{scroll-padding-top:var(--clock-dock-height,110px)}
     <button class="btn btn-sm" id="att-backup-import" type="button">还原考勤备份</button>
     <input id="att-backup-file" type="file" accept=".json,application/json" aria-label="选择考勤备份文件" hidden>
   </div>
+  <details class="att-backup-paste">
+    <summary>粘贴考勤备份</summary>
+    <label for="att-backup-text">考勤备份 JSON</label>
+    <textarea id="att-backup-text" rows="3" maxlength="5242880" autocomplete="off" spellcheck="false"></textarea>
+    <button type="button" class="btn btn-sm" id="att-backup-merge">合并考勤记录</button>
+  </details>
   <p class="hint" id="att-backup-status" role="status" aria-live="polite"></p>
 </details>
     </section>
@@ -3048,6 +3057,25 @@ function initAttendanceBackup(){
     } finally { output.disabled = false; }
   });
 
+  async function importBackup(text){
+    if (new Blob([text]).size > ATTENDANCE_BACKUP_MAX_BYTES) throw new Error('考勤备份不能超过 5 MiB。');
+    const {added,skipped} = await mergeAttendanceRecords(parseAttendanceBackup(text));
+    status.textContent = '还原完成，新增 '+added+' 天，跳过已有日期 '+skipped+' 天。';
+  }
+  const pasteButton = $('#att-backup-merge'), textInput = $('#att-backup-text');
+  pasteButton.addEventListener('click',async ()=>{
+    pasteButton.disabled = true;
+    textInput.readOnly = true;
+    try {
+      await importBackup(textInput.value);
+      textInput.value = '';
+    } catch (error) {
+      status.textContent = '还原失败。'+error.message;
+    } finally {
+      pasteButton.disabled = false;
+      textInput.readOnly = false;
+    }
+  });
   restore.addEventListener('click',()=>fileInput.click());
   fileInput.addEventListener('change',async ()=>{
     const file = fileInput.files[0];
@@ -3057,9 +3085,7 @@ function initAttendanceBackup(){
     status.textContent = '正在读取考勤备份…';
     try {
       if (file.size > ATTENDANCE_BACKUP_MAX_BYTES) throw new Error('请选择 5 MiB 以内的考勤备份。');
-      const records = parseAttendanceBackup(await file.text());
-      const {added,skipped} = await mergeAttendanceRecords(records);
-      status.textContent = '还原完成，新增 '+added+' 天，跳过已有日期 '+skipped+' 天。';
+      await importBackup(await file.text());
     } catch (error) {
       status.textContent = '还原失败。'+(error.message || '请检查文件后重试。');
     } finally { restore.disabled = false; }
