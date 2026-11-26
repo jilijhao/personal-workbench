@@ -514,7 +514,7 @@ footer{color:var(--dim);font-size:11.5px;text-align:center;padding:30px 0 0}
   background:linear-gradient(112deg,color-mix(in srgb,var(--clock-tint) 65%,var(--surface)),var(--glass) 55%);
   box-shadow:var(--card-shadow),inset 0 1px #ffffff1c
 }
-.work-clock[data-phase="unset"]{grid-template-columns:minmax(0,1fr) auto}
+.work-clock[data-timed="false"]{grid-template-columns:minmax(0,1fr) auto}
 .work-clock[data-phase="overtime"]{--clock-accent:var(--warn);--clock-tint:#f5e9d0;border-color:#c7ad7f}
 :root[data-theme="ink"] .work-clock[data-phase="overtime"]{--clock-tint:#403627;border-color:#716042}
 .work-clock [hidden],#clock-dialog [hidden]{display:none!important}
@@ -601,7 +601,7 @@ body:has(#plan-dialog[open]){overflow:hidden}
 .clock-dock{position:sticky;top:0;z-index:8;padding:9px 0 5px;background:var(--bg);background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 html{scroll-padding-top:var(--clock-dock-height,110px)}
 .clock-dock .work-clock{padding:12px 18px;gap:4px 18px;grid-template-columns:minmax(0,1fr) minmax(135px,.65fr) auto;box-shadow:0 2px 12px #10251a0d}
-.clock-dock .work-clock[data-phase="unset"]{grid-template-columns:minmax(0,1fr) auto}
+.clock-dock .work-clock[data-timed="false"]{grid-template-columns:minmax(0,1fr) auto}
 .clock-dock .clock-reading{display:contents}
 .clock-dock .clock-info{grid-column:1;grid-row:1}
 .clock-dock .clock-value{grid-column:2;grid-row:1;justify-content:flex-end;align-items:center}
@@ -618,6 +618,7 @@ html{scroll-padding-top:var(--clock-dock-height,110px)}
   .clock-dock .work-clock{padding:9px 12px;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px}
   .clock-dock .clock-info{grid-column:1;grid-row:1}
   .clock-dock .clock-buttons{grid-column:2;grid-row:1}
+  .clock-dock .clock-buttons:has(#clock-new-day:not([hidden])){flex-wrap:wrap;max-width:155px}
   .clock-dock .clock-value{grid-column:1/-1;grid-row:2;flex-direction:row;align-items:baseline;justify-content:flex-end}
   .clock-dock .clock-track{grid-row:3;margin-top:13px;--runner-width:33px}
   .clock-dock .clock-runner{height:21px}
@@ -663,7 +664,7 @@ html{scroll-padding-top:var(--clock-dock-height,110px)}
 .att-day-mark{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--muted);max-width:100%}
 .att-day-mark::before{content:"";width:6px;height:6px;flex:none;border-radius:50%;background:currentColor}
 .att-day[data-state="work"] .att-day-mark{color:var(--ok)}
-.att-day[data-state="partial"] .att-day-mark,.att-day[data-state="leave"] .att-day-mark{color:var(--warn)}
+.att-day[data-state="partial"] .att-day-mark,.att-day[data-state="missing"] .att-day-mark,.att-day[data-state="leave"] .att-day-mark{color:var(--warn)}
 .att-day-hours{display:none;font-variant-numeric:tabular-nums}
 @container(min-width:640px){.att-day-hours{display:inline}.att-day-hours + .att-work-label{display:none}}
 .att-cal-hint{margin:12px 0 0}
@@ -788,6 +789,7 @@ html{scroll-padding-top:var(--clock-dock-height,110px)}
         </div>
         <div class="clock-buttons">
           <button class="btn btn-ghost" id="clock-settings" type="button" aria-haspopup="dialog">设置上下班时间</button>
+          <button class="btn" id="clock-new-day" data-action="new-day" type="button" hidden>新班打卡</button>
           <button class="btn" id="clock-toggle" type="button" hidden>我下班了</button>
         </div>
         <p id="clock-error" role="alert" hidden></p>
@@ -929,11 +931,20 @@ html{scroll-padding-top:var(--clock-dock-height,110px)}
         <fieldset class="att-day-kind">
           <legend>日期类型</legend>
           <label><input type="radio" name="attendance-kind" value="work" checked>工作</label>
+          <label><input type="radio" name="attendance-kind" value="missing">缺卡</label>
           <label><input type="radio" name="attendance-kind" value="rest">休息</label>
           <label><input type="radio" name="attendance-kind" value="leave">请假</label>
         </fieldset>
+        <fieldset id="att-missing-fields" hidden disabled>
+          <div class="att-work-fields">
+            <div class="field"><label for="attendance-punch">唯一已知的打卡时间</label><input id="attendance-punch" type="time" required></div>
+            <label class="checkrow"><input type="checkbox" id="attendance-punch-next-day">这次打卡在次日</label>
+            <p class="hint">当天计入出勤和待补天数。核实上下班时间后，选择「工作」补全工时。</p>
+          </div>
+        </fieldset>
         <fieldset id="att-work-fields">
           <div class="att-work-fields">
+            <span id="att-previous-punch" class="att-calculated" hidden></span>
             <div class="att-form-pair">
               <div class="field"><div class="att-input-head"><label for="attendance-start">实际上班</label><button class="att-now" data-att-now="attendance-start" type="button" aria-label="上班时间填入当前时刻">填现在</button></div>
                 <input type="time" id="attendance-start" required>
@@ -2136,14 +2147,10 @@ function clearAll(){
 /* ---------- 上下班时钟 ---------- */
 const WORK_CLOCK_KEY = 'workbench.workclock.v1';
 const CLOCK_TIME = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
-let unsavedClockObservation = null;
 
 function readWorkClock(){
   try {
     const raw = localStorage.getItem(WORK_CLOCK_KEY);
-    if (unsavedClockObservation && unsavedClockObservation.raw === raw)
-      return {...unsavedClockObservation.state};
-    unsavedClockObservation = null;
     const saved = JSON.parse(raw);
     if (!saved || typeof saved.startTime !== 'string' || typeof saved.endTime !== 'string' ||
         !CLOCK_TIME.test(saved.startTime) || !CLOCK_TIME.test(saved.endTime) || saved.startTime === saved.endTime) return null;
@@ -2157,7 +2164,6 @@ function readWorkClock(){
 function writeWorkClock(state){
   try {
     localStorage.setItem(WORK_CLOCK_KEY,JSON.stringify(state));
-    unsavedClockObservation = null;
   } catch { throw new Error('时钟设置保存失败，请检查浏览器的本地存储权限或空间。'); }
 }
 function shiftBounds(clock, day, offset){
@@ -2189,18 +2195,66 @@ function clockStateAt(clock, now){
   const timerMs = phase === 'before' ? startAt-time : phase === 'working' ? endAt-time : Math.max(0,(finishedAt ?? time)-endAt);
   return {phase,startTime:clock.startTime,endTime:clock.endTime,startAt,endAt,finishedAt,timerMs,progress};
 }
+function attendanceInstant(date,time,nextDay=false){
+  const day = parseDate(date);
+  const [hours,minutes] = time.split(':').map(Number);
+  if (nextDay) day.setDate(day.getDate()+1);
+  day.setHours(hours,minutes,0,0);
+  return day.getTime();
+}
+function shiftAttendanceRecord(records,clock,now){
+  const today = fmtDate(now), current = records[today];
+  const prior = records[shiftDays(today,-1)];
+  if (current?.kind === 'missing' || (current?.kind === 'work' && attendanceInstant(today,current.start) <= now.getTime())) return current;
+  if (!current && prior?.kind === 'missing' && prior.punchNextDay && prior.punch &&
+      (!clock || now.getTime() < shiftBounds(clock,now,0).startAt)) return prior;
+  if (prior?.kind === 'work') {
+    const beforeNextShift = !clock || now.getTime() < shiftBounds(clock,now,0).startAt;
+    const remaining = attendanceTimeMinutes(prior.start) - (now.getHours()*60+now.getMinutes());
+    const ongoing = !prior.end && remaining >= 0;
+    const canResume = !current && prior.nextDay && remaining > 0;
+    if (beforeNextShift && (ongoing || canResume)) return prior;
+  }
+  return current || null;
+}
+function linkedClockState(clock,records,now){
+  const today = fmtDate(now), record = shiftAttendanceRecord(records,clock,now);
+  // 旧版时钟打开过并不代表实际出勤。仅有历史下班标记时才沿用它的班次归属。
+  const schedule = clock && clock.finishedAt === null ? {...clock,observedStartAt:null} : clock;
+  const base = clockStateAt(schedule,now);
+  const result = {...base,record,date:record?.date || today,action:'checkin',
+    newDayAvailable:Boolean(record?.end && record.date !== today && !records[today] &&
+      attendanceInstant(record.date,record.end,record.nextDay) <= now.getTime())};
+  if (!record) {
+    if (base.phase === 'finished') result.action = 'resume';
+    else if (base.phase === 'overtime') result.phase = 'pending';
+    return result;
+  }
+  if (record.kind !== 'work') return {...result,phase:record.kind,action:record.kind === 'missing' ? 'repair' : ''};
+  const actualStart = attendanceInstant(record.date,record.start);
+  const actualEnd = record.end ? attendanceInstant(record.date,record.end,record.nextDay) : null;
+  if (now.getTime() < actualStart || (actualEnd !== null && now.getTime() < actualEnd))
+    return {...result,phase:'recorded',action:''};
+  const action = actualEnd === null ? 'checkout' : 'resume';
+  if (!clock) return {...result,action,phase:actualEnd === null ? 'tracking' : 'finished',
+    startAt:actualStart,finishedAt:actualEnd,timerMs:actualEnd === null ? now.getTime()-actualStart : attendanceWorkedMinutes(record)*60000};
+  const afterMidnight = clock.endTime < clock.startTime && record.start < clock.endTime;
+  const shift = shiftBounds(clock,parseDate(record.date),afterMidnight ? -1 : 0);
+  const time = actualEnd ?? now.getTime();
+  const phase = actualEnd !== null ? 'finished' : time < shift.endAt ? 'working' : 'overtime';
+  const timerMs = phase === 'working' ? shift.endAt-time : Math.max(0,time-Math.max(shift.endAt,actualStart));
+  return {...result,...shift,phase,action,finishedAt:actualEnd,timerMs,
+    progress:Math.max(0,Math.min(1,(time-shift.startAt)/Math.max(1,shift.endAt-shift.startAt)))};
+}
+let clockAttendanceCache = null;
 function workClockSnapshot(now=new Date()){
   const clock = readWorkClock();
-  const snapshot = clockStateAt(clock,now);
-  if (clock && snapshot.phase !== 'before' && clock.observedStartAt !== snapshot.startAt) {
-    const state = {...clock,observedStartAt:snapshot.startAt,finishedAt:null};
-    try { writeWorkClock(state); }
-    catch {
-      // 只记一次已开始的班次，存储空间不足时仍可在当前页面跨午夜计时。
-      try { unsavedClockObservation = {raw:localStorage.getItem(WORK_CLOCK_KEY),state}; } catch {}
-    }
+  try {
+    if (!clockAttendanceCache) clockAttendanceCache = readAttendanceRecords();
+    return linkedClockState(clock,clockAttendanceCache,now);
+  } catch {
+    return {...clockStateAt(clock,now),phase:'unavailable',record:null,action:''};
   }
-  return snapshot;
 }
 function setWorkSchedule(startHHMM,endHHMM,now=new Date()){
   if (typeof startHHMM !== 'string' || typeof endHHMM !== 'string' || !CLOCK_TIME.test(startHHMM) || !CLOCK_TIME.test(endHHMM))
@@ -2228,28 +2282,35 @@ function setWorkSchedule(startHHMM,endHHMM,now=new Date()){
   writeWorkClock(state);
   return snapshot;
 }
-function finishWorkShift(now=new Date()){
-  const clock = readWorkClock();
-  const snapshot = clockStateAt(clock,now);
-  if (snapshot.phase === 'finished') return snapshot;
-  if (!['working','overtime'].includes(snapshot.phase)) throw new Error('当前没有已开始的班次。');
-  const state = {...clock,observedStartAt:snapshot.startAt,finishedAt:now.getTime()};
-  writeWorkClock(state);
-  return clockStateAt(state,now);
-}
-function resumeWorkShift(now=new Date()){
-  const clock = readWorkClock();
-  const snapshot = clockStateAt(clock,now);
-  if (snapshot.phase !== 'finished') return snapshot;
-  const state = {...clock,finishedAt:null};
-  writeWorkClock(state);
-  return clockStateAt(state,now);
+async function punchWorkClock(action,date,now=new Date()){
+  const today = fmtDate(now);
+  const time = pad(now.getHours())+':'+pad(now.getMinutes());
+  await changeAttendanceEntries(records=>{
+    const state = linkedClockState(readWorkClock(),records,now);
+    if (!['checkin','checkout','resume','new-day'].includes(action) || (state.record && state.record.kind !== 'work'))
+      throw new Error('请在考勤页核对并补录当天记录。');
+    const newDay = action === 'new-day' && state.newDayAvailable && date === today;
+    if (!newDay && (state.action !== action || state.date !== date || !action))
+      throw new Error('班次或考勤已更新，请查看当前状态后再操作。');
+    if (newDay || !state.record) {
+      // 旧版结束记录没有实际上班时间，继续工作从这一刻开始记。
+      records[today] = normalizeAttendanceEntry({date:today,kind:'work',start:time,end:'',
+        nextDay:false,breakMinutes:0,overtimeMinutes:null,note:''});
+    } else if (action === 'resume') {
+      records[date] = normalizeAttendanceEntry({...state.record,end:'',nextDay:false});
+    } else {
+      if (date === today && time === state.record.start) throw new Error('考勤按分钟记录，请在上班打卡的下一分钟后下班。');
+      records[date] = normalizeAttendanceEntry({...state.record,end:time,nextDay:date !== today});
+    }
+  });
+  if (store.ui.view === 'attendance') refreshAttendance();
 }
 
 /* ---------- 工作时钟卡片 ---------- */
 const clockLabels = {
   before:['未上班','距离上班'], working:['工作中','距离下班'],
-  overtime:['加班中','已加班'], finished:['已下班','本班加班']
+  overtime:['加班中','已加班'], finished:['已下班','下班后计时'], tracking:['已打卡','已打卡时长'],
+  pending:['未打卡',''], rest:['休息',''], leave:['请假',''], recorded:['已预填',''], missing:['缺卡',''], unavailable:['考勤不可读','']
 };
 let clockTick = null;
 let clockCalendarDate = todayStr();
@@ -2284,32 +2345,42 @@ function renderShiftCountdown(clock){
 }
 function renderWorkClock(clock){
   const {phase,startTime,endTime,finishedAt,timerMs,progress} = clock;
-  const configured = phase !== 'unset';
-  const stateKey = [phase,startTime,endTime,finishedAt].join('|');
+  const {record,action,date} = clock;
+  const hasSchedule = Boolean(startTime);
+  const timed = ['before','working','overtime','finished','tracking'].includes(phase);
+  const stateKey = [phase,startTime,endTime,finishedAt,action,date,record?.start,record?.end,record?.nextDay,record?.punch,record?.punchNextDay,clock.newDayAvailable].join('|');
   if (stateKey !== clockCardState) {
     clockCardState = stateKey;
-    const status = $('#clock-phase'), action = $('#clock-toggle');
+    const status = $('#clock-phase'), button = $('#clock-toggle');
     $('#work-clock').dataset.phase = phase;
-    status.hidden = !configured;
-    $('.clock-reading').hidden = !configured;
-    $('#clock-settings').textContent = configured ? '调整班次' : '设置上下班时间';
-    action.hidden = !configured || phase === 'before';
-    action.textContent = phase === 'finished' ? '继续工作' : '我下班了';
-    let range = '设置班次后可查看下班倒计时。';
-    if (configured) {
-      const [phaseLabel, caption] = clockLabels[phase];
-      status.textContent = phaseLabel;
-      $('#clock-caption').textContent = caption;
-      range = startTime + ' — ' + (endTime < startTime ? '次日 ' : '') + endTime;
-      if (phase === 'finished') {
-        const day = new Date(finishedAt);
-        const nextDay = fmtDate(day) !== fmtDate(new Date(clock.startAt)) ? '次日 ' : '';
-        range += ' · ' + nextDay + pad(day.getHours()) + ':' + pad(day.getMinutes()) + ' 下班';
-      }
-    }
-    $('#clock-range').textContent = range;
+    $('#work-clock').dataset.timed = String(timed);
+    status.hidden = phase === 'unset';
+    $('.clock-reading').hidden = !timed;
+    $('#clock-settings').textContent = hasSchedule ? '调整班次' : '设置上下班时间';
+    button.hidden = !action;
+    const newDayButton = $('#clock-new-day');
+    newDayButton.hidden = !clock.newDayAvailable;
+    newDayButton.dataset.date = todayStr();
+    button.dataset.action = action;
+    button.dataset.date = date || '';
+    button.textContent = {checkin:'上班打卡',checkout:'我下班了',resume:'继续工作',repair:'补录考勤'}[action] || '';
+    const [phaseLabel,caption] = clockLabels[phase] || ['未打卡',''];
+    status.textContent = action === 'checkin' ? '未打卡' : phaseLabel;
+    $('#clock-caption').textContent = !hasSchedule && phase === 'finished' ? '本次净工时' : caption;
+    const range = hasSchedule ? ['班次 '+startTime+' — '+(endTime < startTime ? '次日 ' : '')+endTime] : [];
+    if (record?.kind === 'work') {
+      const prefix = record.date === todayStr() ? '' : record.date.slice(5)+' ';
+      range.push('实到 '+prefix+record.start+(record.end ? ' · 实退 '+(record.nextDay?'次日 ':'')+record.end : ''));
+    } else if (phase === 'finished') {
+      const end = new Date(finishedAt);
+      range.push('已下班 '+pad(end.getHours())+':'+pad(end.getMinutes()));
+    } else if (phase === 'missing') {
+      range.push(record.punch ? '单次打卡 '+(record.punchNextDay?'次日 ':'')+record.punch+' · 待补录' : '上下班时间待补录');
+    } else if (phase === 'unavailable') range.push('请在考勤页检查本地记录。');
+    else if (phase === 'rest' || phase === 'leave') range.push('今日已登记'+phaseLabel);
+    $('#clock-range').textContent = range.join(' ｜ ') || '可直接打卡，设置班次后可查看下班倒计时。';
   }
-  if (!configured) return;
+  if (!timed) return;
   const seconds = phase === 'before' || phase === 'working' ? Math.ceil(timerMs/1000) : Math.floor(timerMs/1000);
   const time = [Math.floor(seconds/3600),Math.floor(seconds/60)%60,seconds%60].map(pad).join(':');
   const display = $('#clock-time');
@@ -2337,7 +2408,7 @@ function refreshWorkClock(){
   const snapshot = workClockSnapshot(now);
   renderWorkClock(snapshot);
   renderShiftCountdown(snapshot);
-  const interval = ['before','working','overtime'].includes(snapshot.phase) ? 1000 : 60000;
+  const interval = ['before','working','overtime','tracking'].includes(snapshot.phase) ? 1000 : 60000;
   clockTick = setTimeout(refreshWorkClock,interval - now.getTime() % interval);
 }
 function initWorkClock(){
@@ -2379,17 +2450,28 @@ function initWorkClock(){
       if (start.value === end.value) end.focus();
     }
   });
-  $('#clock-toggle').addEventListener('click',()=>{
+  $('.clock-buttons').addEventListener('click',async event=>{
+    const button = event.target.closest('[data-action]');
+    if (!button) return;
     const message = $('#clock-error');
+    if (button.disabled) return;
+    if (button.dataset.action === 'repair') {
+      const date = button.dataset.date;
+      navigateView('attendance');
+      if (store.ui.view === 'attendance' && selectAttendanceDate(date)) {
+        $('#att-editor-anchor').scrollIntoView({block:'start'});
+        $('input[name="attendance-kind"]:checked')?.focus({preventScroll:true});
+      }
+      return;
+    }
     message.hidden = true;
+    button.disabled = true;
     try {
-      if ($('#work-clock').dataset.phase === 'finished') resumeWorkShift();
-      else finishWorkShift();
+      await punchWorkClock(button.dataset.action,button.dataset.date);
     } catch (err) {
       message.textContent = err.message;
       message.hidden = false;
-    }
-    refreshWorkClock();
+    } finally { button.disabled = false; refreshWorkClock(); }
   });
   document.addEventListener('visibilitychange',refreshWorkClock);
   window.addEventListener('focus',refreshWorkClock);
@@ -2397,7 +2479,8 @@ function initWorkClock(){
   window.addEventListener('pagehide',()=>clearTimeout(clockTick));
   window.addEventListener('storage',event=>{
     if (event.key === compactShiftKey || event.key === null) compactShift = event.newValue || '';
-    if (event.key === WORK_CLOCK_KEY || event.key === compactShiftKey || event.key === null) refreshWorkClock();
+    if (event.key === ATTENDANCE_KEY || event.key === null) clockAttendanceCache = null;
+    if ([ATTENDANCE_KEY,WORK_CLOCK_KEY,compactShiftKey,null].includes(event.key)) refreshWorkClock();
   });
 }
 
@@ -2571,8 +2654,8 @@ function validAttendanceDate(date){
   return typeof date === 'string' && /^[1-9]\d{3}-(0[1-9]|1[0-2])-([0-2]\d|3[01])$/.test(date)
     && fmtDate(parseDate(date)) === date;
 }
-function attendanceTimeMinutes(time){
-  if (typeof time !== 'string' || !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) throw new Error('请填写有效的上下班时间。');
+function attendanceTimeMinutes(time, label='上下班时间'){
+  if (typeof time !== 'string' || !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) throw new Error('请填写有效的'+label+'。');
   const [hours,minutes] = time.split(':').map(Number);
   return hours*60+minutes;
 }
@@ -2590,18 +2673,26 @@ function attendanceWorkedMinutes(record){
 }
 function attendanceOvertimeMinutes(record){ return record.kind === 'work' ? record.overtimeMinutes : null; }
 function normalizeAttendanceEntry(raw){
-  if (!raw || !validAttendanceDate(raw.date) || !['work','rest','leave'].includes(raw.kind)) throw new Error('日期或考勤类型无效。');
+  if (!raw || !validAttendanceDate(raw.date) || !['work','missing','rest','leave'].includes(raw.kind)) throw new Error('日期或考勤类型无效。');
   if (typeof raw.note !== 'string' || raw.note.length > 500) throw new Error('备注最多可填 500 字。');
   if (typeof raw.start !== 'string' || typeof raw.end !== 'string' || typeof raw.nextDay !== 'boolean'
     || !Number.isInteger(raw.breakMinutes)) throw new Error('时间字段格式无效。');
   const {date,kind,start,end,nextDay,breakMinutes} = raw;
   const overtimeMinutes = raw.overtimeMinutes ?? null;
   const entry = {date,kind,start,end,nextDay,breakMinutes,overtimeMinutes,note:raw.note.trim()};
+  if (kind === 'missing') {
+    if (start || end || nextDay || breakMinutes || overtimeMinutes !== null)
+      throw new Error('缺卡记录只保留一次打卡，须留空上下班时间、工时和加班。');
+    attendanceTimeMinutes(raw.punch,'单次打卡时间');
+    if (raw.punchNextDay !== undefined && typeof raw.punchNextDay !== 'boolean') throw new Error('打卡是否在次日须为布尔值。');
+    return {...entry,punch:raw.punch,punchNextDay:raw.punchNextDay ?? false};
+  }
+  if (raw.punch || raw.punchNextDay) throw new Error('单次打卡时间只能用于缺卡记录。');
   if (kind !== 'work' && (start || end || nextDay || breakMinutes || overtimeMinutes !== null))
     throw new Error('休息和请假记录只能填写日期与备注。');
   if (!end && nextDay) throw new Error('请填写次日下班时间。');
   const worked = attendanceWorkedMinutes(entry);
-  if (overtimeMinutes !== null && (!Number.isInteger(overtimeMinutes) || worked === null || overtimeMinutes < 0 || overtimeMinutes > worked))
+  if (overtimeMinutes !== null && (!Number.isInteger(overtimeMinutes) || overtimeMinutes < 0 || overtimeMinutes > 1440 || (worked !== null && overtimeMinutes > worked)))
     throw new Error('加班分钟应为有效工时内的非负整数。');
   return entry;
 }
@@ -2621,9 +2712,19 @@ function readAttendanceRecords(){
 async function changeAttendanceEntries(update){
   const write = ()=>{
     const current = readAttendanceRecords();
+    const oldClock = readWorkClock();
+    const legacyDate = oldClock?.finishedAt != null && oldClock.observedStartAt != null
+      ? fmtDate(new Date(oldClock.observedStartAt)) : '';
+    const hadLegacyEntry = Boolean(current[legacyDate]);
     const result = update(current);
     try { localStorage.setItem(ATTENDANCE_KEY,JSON.stringify(current)); }
     catch { throw new Error('未能保存，请检查浏览器可用空间和存储权限。'); }
+    if (legacyDate && (hadLegacyEntry || current[legacyDate])) {
+      // 手填或打卡记录接管对应班次后，旧计时器的结束标记不应在删记录后重新出现。
+      try { writeWorkClock({...oldClock,finishedAt:null,observedStartAt:null}); } catch {}
+    }
+    clockAttendanceCache = current;
+    refreshWorkClock();
     return result;
   };
   return navigator.locks ? navigator.locks.request(ATTENDANCE_KEY,write) : write();
@@ -2747,6 +2848,10 @@ function renderAttendanceCalendar(month,records,selectedDate){
           state = 'partial'; label = '待补';
           details = record.start && !record.end ? '，缺少下班时间' : record.end && !record.start ? '，缺少上班时间' : '，工时未完整';
         }
+      } else if (record.kind === 'missing') {
+        workCount++;
+        state = 'missing'; label = '缺卡';
+        details = '，仅有一次打卡 '+(record.punchNextDay ? '次日 ' : '')+record.punch+'，待补工时';
       } else if (record.kind === 'rest') { state = 'rest'; label = '休息'; restCount++; }
       else if (record.kind === 'leave') { state = 'leave'; label = '请假'; leaveCount++; }
       if (Number.isFinite(overtime)) details += '，已记加班 '+attendanceCalendarDuration(overtime);
@@ -2790,13 +2895,13 @@ function attendanceFormValues(){
   const work = kind === 'work';
   const start = work ? $('#attendance-start').value : '';
   const end = work ? $('#attendance-end').value : '';
-  const complete = Boolean(start && end);
   const overtime = $('#attendance-overtime');
   return {
     date:attendanceEditorDate,kind,start,end,
+    ...(kind === 'missing' ? {punch:$('#attendance-punch').value,punchNextDay:$('#attendance-punch-next-day').checked} : {}),
     nextDay:Boolean(end && $('#attendance-next-day').checked),
     breakMinutes:work ? Number($('#attendance-break').value || 0) : 0,
-    overtimeMinutes:complete && overtime.value !== '' ? overtime.valueAsNumber : null,
+    overtimeMinutes:work && overtime.value !== '' ? overtime.valueAsNumber : null,
     note:$('#attendance-note').value
   };
 }
@@ -2813,6 +2918,11 @@ function attendanceFormCanLeave(){
 function refreshAttendanceForm(){
   const record = attendanceFormValues(), work = record.kind === 'work';
   const complete = Boolean(record.start && record.end);
+  const missing = $('#att-missing-fields');
+  missing.hidden = missing.disabled = record.kind !== 'missing';
+  const previousPunch = $('#att-previous-punch');
+  previousPunch.hidden = !work || attendanceEditorOriginal?.kind !== 'missing';
+  if (!previousPunch.hidden) previousPunch.textContent = '原记录只有一次打卡：'+(attendanceEditorOriginal.punchNextDay ? '次日 ' : '')+attendanceEditorOriginal.punch+'。请核实后填写上下班时间。';
   const fields = $('#att-work-fields');
   fields.hidden = !work;
   fields.disabled = !work;
@@ -2838,6 +2948,8 @@ function renderAttendanceForm(date,record,force=false){
   for (const input of $$('input[name="attendance-kind"]')) input.checked = input.value === (record?.kind || 'work');
   $('#attendance-start').value = record?.start || '';
   $('#attendance-end').value = record?.end || '';
+  $('#attendance-punch').value = record?.punch || '';
+  $('#attendance-punch-next-day').checked = record?.punchNextDay === true;
   $('#attendance-next-day').checked = Boolean(record?.nextDay);
   $('#attendance-break').value = record?.breakMinutes || '';
   $('#attendance-overtime').value = record?.overtimeMinutes ?? '';
@@ -2858,7 +2970,7 @@ async function commitAttendanceForm(remove){
       if (!record.start) throw new Error('请填写实际上班时间。');
       const minutes = attendanceWorkedMinutes(record);
       if (record.overtimeMinutes !== null && (!Number.isSafeInteger(record.overtimeMinutes) ||
-          record.overtimeMinutes < 0 || minutes === null || record.overtimeMinutes > minutes))
+          record.overtimeMinutes < 0 || (minutes !== null && record.overtimeMinutes > minutes)))
         throw new Error('自记加班请填写 0 至有效工时之间的整数分钟。');
     }
     attendanceEditorBusy = true;
